@@ -39,7 +39,7 @@ st.markdown("""
     }
     .header-text { color: #0047AB; font-family: 'Helvetica'; }
     </style>
-    """, unsafe_allow_stdio=True)
+    """, unsafe_allow_html=True)
 
 st.markdown("<h1 class='header-text'>🧬 IndoGen-AI: Sistem Kesehatan Presisi</h1>", unsafe_allow_html=True)
 st.markdown("Integrasi **Farmakogenomik** & **Nutrigenomik** berbasis data BGSi Nasional.")
@@ -115,3 +115,5 @@ if st.sidebar.button("🚀 ANALISIS KESEHATAN PRESISI"):
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Powered by Gemini 3 Flash (Free Tier)")
+
+
