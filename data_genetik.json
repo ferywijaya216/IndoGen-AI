@@ -1,0 +1,112 @@
+[
+  {
+    "nama": "Budi Santoso",
+    "usia": 55,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "170 cm / 85 kg",
+    "etnis": "Jawa",
+    "kondisi_saat_ini": "Diabetes Melitus Tipe 2",
+    "rsid_data": "RS7903146(T/T), RS1229984(A/A)",
+    "keterangan_risiko": "Risiko tinggi komplikasi ginjal (Gen TCF7L2).",
+    "fokus_nutrigenomik": "Perlu kontrol glikemik ketat; saran penggunaan gula tebu kuning atau gula merah dalam dosis rendah sebagai pengganti gula rafinasi."
+  },
+  {
+    "nama": "Siti Aminah",
+    "usia": 42,
+    "jenis_kelamin": "Perempuan",
+    "tb_bb": "155 cm / 48 kg",
+    "etnis": "Bugis",
+    "kondisi_saat_ini": "Hiperlipidemia (Kolesterol Tinggi)",
+    "rsid_data": "RS4149056(C/C), RS4680(A/G)",
+    "keterangan_risiko": "Respon buruk terhadap obat Simvastatin (risiko nyeri otot tinggi).",
+    "fokus_nutrigenomik": "Diet tinggi omega-3 dan lemak tak jenuh dari sumber lokal."
+  },
+  {
+    "nama": "Dewi Sartika",
+    "usia": 28,
+    "jenis_kelamin": "Perempuan",
+    "tb_bb": "160 cm / 55 kg",
+    "etnis": "Sunda",
+    "kondisi_saat_ini": "Anemia & Kelelahan Kronis",
+    "rsid_data": "RS1801133(T/T), RS1042713(G/G)",
+    "keterangan_risiko": "Gangguan metabolisme folat (Gen MTHFR).",
+    "fokus_nutrigenomik": "Kebutuhan folat tinggi; hindari asam folat sintetik, fokus pada nutrisi alami."
+  },
+  {
+    "nama": "Nyoman Wahyu",
+    "usia": 35,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "175 cm / 70 kg",
+    "etnis": "Bali",
+    "kondisi_saat_ini": "Pasca Operasi Jantung (Pemasangan Ring)",
+    "rsid_data": "RS1799971(A/G), RS1057910(A/C)",
+    "keterangan_risiko": "Metabolisme lambat pada obat pengencer darah (Warfarin/Clopidogrel).",
+    "fokus_nutrigenomik": "Kontrol asupan Vitamin K untuk menjaga efektivitas obat."
+  },
+  {
+    "nama": "Ahmad Fauzi",
+    "usia": 60,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "165 cm / 78 kg",
+    "etnis": "Minang",
+    "kondisi_saat_ini": "Hipertensi",
+    "rsid_data": "RS1801278(G/A), RS5068(A/G)",
+    "keterangan_risiko": "Sensitivitas tinggi terhadap garam (Salt-sensitive hypertension).",
+    "fokus_nutrigenomik": "Diet rendah natrium; penggunaan rempah lokal sebagai pengganti garam."
+  },
+  {
+    "nama": "Lestari Putri",
+    "usia": 24,
+    "jenis_kelamin": "Perempuan",
+    "tb_bb": "158 cm / 50 kg",
+    "etnis": "Melayu",
+    "kondisi_saat_ini": "Asma Bronkial",
+    "rsid_data": "RS1042713(A/G), RS1800532(C/T)",
+    "keterangan_risiko": "Respon moderat terhadap inhaler Albuterol.",
+    "fokus_nutrigenomik": "Asupan antioksidan tinggi (Vitamin C & E) untuk kesehatan paru."
+  },
+  {
+    "nama": "Irfan Hakim",
+    "usia": 47,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "172 cm / 90 kg",
+    "etnis": "Betawi",
+    "kondisi_saat_ini": "Obesitas & Gejala Fatty Liver",
+    "rsid_data": "RS738409(G/G), RS1799883(C/T)",
+    "keterangan_risiko": "Risiko tinggi perlemakan hati non-alkohol (PNPLA3).",
+    "fokus_nutrigenomik": "Batasi fruktosa tinggi; gula merah lebih disarankan daripada sirup jagung fruktosa tinggi."
+  },
+  {
+    "nama": "Maria Ulfa",
+    "usia": 31,
+    "jenis_kelamin": "Perempuan",
+    "tb_bb": "150 cm / 45 kg",
+    "etnis": "Madura",
+    "kondisi_saat_ini": "Osteopenia dini",
+    "rsid_data": "RS1544410(A/A), RS731236(T/C)",
+    "keterangan_risiko": "Reseptor Vitamin D kurang efisien (Gen VDR).",
+    "fokus_nutrigenomik": "Memerlukan suplementasi Vitamin D3 dan kalsium lebih tinggi dari rata-rata."
+  },
+  {
+    "nama": "Rizky Pratama",
+    "usia": 19,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "180 cm / 65 kg",
+    "etnis": "Batak",
+    "kondisi_saat_ini": "Gastritis Kronis (Maag)",
+    "rsid_data": "RS1799953(C/T), RS1801280(T/T)",
+    "keterangan_risiko": "Sensitivitas tinggi terhadap makanan pedas dan kafein.",
+    "fokus_nutrigenomik": "Pola makan 'Little and Often'; hindari pemicu asam lambung."
+  },
+  {
+    "nama": "Andi Wijaya",
+    "usia": 52,
+    "jenis_kelamin": "Laki-laki",
+    "tb_bb": "168 cm / 72 kg",
+    "etnis": "Dayak",
+    "kondisi_saat_ini": "Asam Urat (Gout)",
+    "rsid_data": "RS2231142(G/G), RS1194222(C/T)",
+    "keterangan_risiko": "Ekskresi asam urat rendah melalui ginjal (Gen ABCG2).",
+    "fokus_nutrigenomik": "Hindari makanan tinggi purin; hidrasi sangat krusial."
+  }
+]
