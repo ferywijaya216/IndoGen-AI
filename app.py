@@ -9,7 +9,7 @@ try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
     # Menggunakan model Gemini 3 Flash terbaru
-    model = genai.GenerativeModel('gemini-3-flash') 
+    model = genai.GenerativeModel('gemini-3-flash-preview')
 except Exception as e:
     st.error("Konfigurasi API Gagal. Pastikan API Key ada di Secrets.")
 
@@ -115,5 +115,6 @@ if st.sidebar.button("🚀 ANALISIS KESEHATAN PRESISI"):
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Powered by Gemini 3 Flash (Free Tier)")
+
 
 
