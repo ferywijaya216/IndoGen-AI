@@ -6,7 +6,7 @@ import json
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
-    # Menggunakan model Gemini 3 Flash Preview sesuai hasil pengecekan Anda
+    # Menggunakan model Gemini 3 Flash Preview
     model = genai.GenerativeModel('gemini-3-flash-preview') 
 except Exception as e:
     st.error("Sistem gagal memverifikasi kredensial API.")
@@ -15,12 +15,18 @@ except Exception as e:
 if 'analisis_output' not in st.session_state:
     st.session_state.analisis_output = ""
 
+# Fungsi untuk refresh/reset halaman
+def reset_session():
+    st.session_state.analisis_output = ""
+    if 'run_analysis' in st.session_state:
+        del st.session_state.run_analysis
+    st.rerun()
+
 # --- 3. UI SETTINGS ---
 st.set_page_config(page_title="IndoGen-AI | Clinical Dashboard", layout="wide")
 
 st.markdown("""
     <style>
-    /* Kursor terlarang saat loading */
     button[disabled] { cursor: not-allowed !important; opacity: 0.6; }
     .report-card { 
         background-color: #ffffff; 
@@ -38,7 +44,6 @@ st.markdown("""
         border-left: 6px solid #1d4ed8;
         margin-bottom: 25px;
     }
-    h3 { color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -86,7 +91,6 @@ else:
         o = st.text_input("Resep Obat")
         t = st.text_area("Keluhan/Observasi Baru")
         
-        # Penyatuan Tombol Simpan & Analisis
         submit = st.form_submit_button("Simpan & Analisis Sekarang", use_container_width=True)
         
         if submit:
@@ -99,34 +103,36 @@ else:
 # --- 5. LOGIKA ANALISIS AI ---
 if 'run_analysis' in st.session_state and st.session_state.run_analysis:
     if final_payload:
-        with st.spinner("IndoGen-AI: Sinkronisasi data farmakogenomik dan parameter klinis..."):
+        with st.spinner("IndoGen-AI: Menganalisis parameter klinis..."):
             prompt = f"""
-            Anda adalah IndoGen-AI, sistem pendukung keputusan klinis tingkat lanjut.
-            Data Pasien: {final_payload['nama']} | Fisik: {final_payload['fisik']}
-            Kondisi Saat Ini: {final_payload['kondisi']}
-            Observasi Tambahan: {final_payload['tambahan']}
-            Resep Obat: {final_payload['obat']}
-            Data RSID: {final_payload['rsid']}
+            Anda adalah IndoGen-AI, sistem pendukung keputusan klinis.
+            Data: {final_payload}
 
-            TUGAS ANALISIS (FORMAT POIN-POIN PROFESIONAL):
-            1. DIAGNOSIS KERJA & PROBABILITAS: Berdasarkan diagnosis awal dan observasi tambahan, berikan kemungkinan penyakit (persentase probabilitas).
-            2. EVALUASI FARMAKOGENOMIK: Analisis efektivitas {final_payload['obat']} terhadap RSID. Berikan rekomendasi 'Lanjutkan', 'Sesuaikan Dosis', atau 'Ganti Obat'.
-            3. RENCANA NUTRIGENOMIK: Strategi diet berbasis genetik. Sertakan penggunaan gula merah atau gula pasir tebu (kuning) HANYA jika relevan secara klinis.
-            4. PROGNOSIS: Analisis risiko jangka panjang berdasarkan parameter antropometri dan genetik.
+            TUGAS ANALISIS (POIN-POIN):
+            1. DIAGNOSIS KERJA & PROBABILITAS: Berikan kemungkinan penyakit (persentase %).
+            2. EVALUASI FARMAKOGENOMIK: Efektivitas obat terhadap RSID.
+            3. RENCANA NUTRIGENOMIK: Diet berbasis genetik. Gunakan gula merah/tebu kuning jika relevan.
+            4. PROGNOSIS KLINIS: Risiko berdasarkan fisik dan genetik.
 
-            Gunakan Bahasa Medis Formal. Sertakan Referensi Vancouver langsung di bagian akhir.
+            Bahasa Medis Formal. Vancouver Style (Daftar Pustaka).
             """
             try:
-                # Menggunakan model Gemini 3 Flash Preview
                 response = model.generate_content(prompt)
                 st.session_state.analisis_output = response.text
                 del st.session_state.run_analysis
             except Exception as e:
-                st.error(f"Kegagalan Sistem AI: {e}")
+                st.error(f"Sistem AI Sibuk: {e}")
 
-# --- 6. DISPLAY DASHBOARD ---
+# --- 6. MAIN DASHBOARD ---
 st.title("IndoGen-AI: Dashboard Intervensi Klinis")
+
 if st.session_state.analisis_output:
+    # Tampilkan Hasil Analisis
     st.markdown(f'<div class="report-card">{st.session_state.analisis_output}</div>', unsafe_allow_html=True)
+    
+    # Tombol Refresh / Selesai
+    st.write("---")
+    if st.button("Selesai & Reset Dashboard", type="primary"):
+        reset_session()
 else:
-    st.info("Sistem siap. Silakan lengkapi parameter klinis di sidebar untuk memulai analisis.")
+    st.info("Sistem siap. Silakan lengkapi parameter klinis di sidebar untuk memulai.")
