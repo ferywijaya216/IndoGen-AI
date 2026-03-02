@@ -2,16 +2,17 @@ import streamlit as st
 import google.generativeai as genai
 import json
 
-# --- 1. CONFIG ---
+# --- 1. KONFIGURASI ENGINE ---
 try:
-    API_KEY = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=API_KEY)
-    # Model Gemini 3 Flash dirancang untuk kecepatan (latency rendah)
-    model = genai.GenerativeModel('gemini-3-flash-preview') 
+    if "GEMINI_API_KEY" in st.secrets:
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        model = genai.GenerativeModel('gemini-3-flash-preview') 
+    else:
+        st.error("API Key tidak ditemukan di Secrets.")
 except Exception as e:
-    st.error("API Error.")
+    st.error(f"Koneksi AI Gagal: {e}")
 
-# --- 2. THEME DESIGN (WHITE PREMIUM) ---
+# --- 2. DESAIN PREMIUM WHITE & 3D SHADOWS ---
 st.set_page_config(page_title="IndoGen-AI | Clinical Portal", layout="wide")
 
 st.markdown("""
@@ -39,10 +40,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SIDEBAR (EMR ALUR RUMAH SAKIT) ---
+# --- 3. SIDEBAR (EMR INTEGRATION) ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2966/2966327.png", width=70)
-    st.markdown("### **Portal Klinis Dokter**")
+    st.markdown("### **Portal Klinis IndoGen-AI**")
     
     try:
         with open('data_genetik.json', 'r') as f:
@@ -52,15 +52,15 @@ with st.sidebar:
         p_name = selected_display.split(" - ")[0]
         p = next(item for item in db_genom if item["nama"] == p_name)
 
-        # DATA DARI PERAWAT (TTV)
+        # DATA DARI PERAWAT
         st.markdown("---")
-        st.caption("📊 HASIL PEMERIKSAAN PERAWAT")
+        st.caption("📊 STATUS PRA-KONSULTASI")
         v = p['ttv']
         st.markdown(f"""
             <div class="vital-box">
                 <b>TD:</b> {v['td']} mmHg<br>
                 <b>Nadi:</b> {v['n']} x/mnt<br>
-                <b>Antropometri:</b> {v['tb']}cm / {v['bb']}kg
+                <b>TB/BB:</b> {v['tb']}cm / {v['bb']}kg
             </div>
         """, unsafe_allow_html=True)
 
@@ -68,47 +68,38 @@ with st.sidebar:
         st.markdown("---")
         st.caption("✍️ ANALISIS DOKTER")
         obat = st.text_input("Rencana Resep:")
-        keluhan = st.text_area("Keluhan Utama:", placeholder="Input keluhan...")
+        keluhan = st.text_area("Keluhan Utama:")
         
-        # Tombol diubah menjadi "Analisa"
         if st.button("Analisa"):
             st.session_state.run_ai = True
-    except:
-        st.error("Gagal sinkronisasi HIS.")
+    except Exception as e:
+        st.error(f"Error Database: {e}")
 
-# --- 4. MAIN DASHBOARD ---
+# --- 4. DASHBOARD UTAMA ---
 st.markdown(f"""
 <div class="his-header">
     <h2 style="margin:0; color:#1E3A8A;">Clinical Decision Support System</h2>
-    <p style="margin:0; color:#64748B;">Integrasi Rekam Medis Elektronik & BGSi Nasional</p>
+    <p style="margin:0; color:#64748B;">Sistem Integrasi Nasional BGSi & Rekam Medis Elektronik</p>
 </div>
 """, unsafe_allow_html=True)
 
 if 'run_ai' in st.session_state and st.session_state.run_ai:
-    # Menggunakan Spinner yang lebih sederhana untuk mengurangi lag UI
     with st.spinner("Menganalisis..."):
         prompt = f"""
         Identitas: IndoGen-AI Specialist.
         Pasien: {p['nama']} | TTV: {p['ttv']} | Genetik: {p['rsid']}
         Keluhan: {keluhan} | Obat: {obat}
-
-        Berikan Laporan Medis Singkat & Padat:
-        1. DIAGNOSIS & PROBABILITAS (%)
-        2. FARMAKOGENOMIK: Kecocokan {obat} dengan {p['rsid']}.
-        3. NUTRIGENOMIK: Diet personal (Gula merah/tebu kuning jika sesuai klinis).
-        4. PASPOR GENOMIK: Pencegahan.
-
-        Vancouver Style.
+        Instruksi: Berikan laporan diagnosis, farmakogenomik, nutrigenomik (termasuk gula merah/tebu kuning jika relevan), dan paspor genomik.
+        Gunakan Bahasa Medis Formal & Vancouver Style.
         """
         try:
             response = model.generate_content(prompt)
             st.markdown(f'<div class="report-card">{response.text}</div>', unsafe_allow_html=True)
             
-            st.write("---")
             if st.button("Selesai & Reset"):
                 del st.session_state.run_ai
                 st.rerun()
         except Exception as e:
-            st.error(f"Terjadi kesalahan: {e}")
+            st.error(f"Gagal memproses AI: {e}")
 else:
-    st.info("Pilih profil pasien di sidebar untuk memulai.")
+    st.info("Silakan pilih pasien dan klik tombol Analisa.")
