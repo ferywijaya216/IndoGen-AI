@@ -84,11 +84,18 @@ with st.sidebar:
         with open('data_genetik.json', 'r') as f:
             db_genom = json.load(f)
         
-        # Pencarian Pasien
-        search = st.selectbox("Pilih Profil Pasien:", [p['nama'] for p in db_genom])
-        p = next(item for item in db_genom if item["nama"] == search)
-        
-        # Info Singkat di Sidebar
+        # --- GANTI BARIS LAMA DENGAN KODE BARU DI SINI ---
+        selected_display = st.selectbox(
+            "Cari Pasien (Nama - NIK):", 
+            [f"{p['nama']} - {p['nik']}" for p in db_genom]
+        )
+
+        # Ambil data asli dari pilihan untuk diproses AI
+        selected_name = selected_display.split(" - ")[0]
+        p = next(item for item in db_genom if item["nama"] == selected_name)
+        # -----------------------------------------------
+
+        # Info Singkat di Sidebar (Tetap Sama)
         st.markdown(f"""
         <div style="background: #F1F5F9; padding: 15px; border-radius: 10px; margin-top: 10px;">
             <small>NIK: {p['nik']}</small><br>
@@ -96,17 +103,6 @@ with st.sidebar:
             <span class="risk-badge">Genetik Terdeteksi</span>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        st.markdown("#### **Input Klinis**")
-        obat = st.text_input("Resep Rencana:", placeholder="Metformin, Tamoxifen, dll")
-        obs = st.text_area("Keluhan/Hasil Lab:", placeholder="Tekanan darah terbaru, gejala...")
-        
-        if st.button("JALANKAN ANALISIS"):
-            st.session_state.run = True
-            
-    except:
-        st.error("Gagal memuat database pasien.")
 
 # --- 4. DASHBOARD UTAMA ---
 st.markdown(f"""
@@ -168,3 +164,4 @@ else:
         <p>Data genetik akan dimuat otomatis setelah pasien dipilih.</p>
     </div>
     """, unsafe_allow_html=True)
+
