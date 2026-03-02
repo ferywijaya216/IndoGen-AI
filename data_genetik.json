@@ -1,82 +1,12 @@
 [
-    {
-        "nama": "Budi Santoso",
-        "nik": "3201010022330001",
-        "tanda_vital": {"td": "145/95 mmHg", "bb": "85 kg", "tb": "170 cm", "nadi": "88 x/mnt"},
-        "kondisi_saat_ini": "Diabetes Melitus Tipe 2 & Hipertensi",
-        "rsid_data": "rs7903146(T/T) - TCF7L2 (Risiko Tinggi), rs1229984(A/A) - ADH1B",
-        "keterangan_risiko": "Resistensi insulin genetik berat."
-    },
-    {
-        "nama": "Siti Aminah",
-        "nik": "3171050044550002",
-        "tanda_vital": {"td": "110/70 mmHg", "bb": "48 kg", "tb": "155 cm", "nadi": "76 x/mnt"},
-        "kondisi_saat_ini": "Kanker Payudara (Evaluasi Terapi)",
-        "rsid_data": "rs1065852(G/G) - CYP2D6 (Poor Metabolizer)",
-        "keterangan_risiko": "Risiko toksisitas obat tinggi."
-    },
-    {
-        "nama": "Luh Putu Astuti",
-        "nik": "5171030011220004",
-        "tanda_vital": {"td": "120/80 mmHg", "bb": "52 kg", "tb": "160 cm", "nadi": "80 x/mnt"},
-        "kondisi_saat_ini": "Epilepsi (Evaluasi Obat)",
-        "rsid_data": "HLA-B*15:02 (Positif)",
-        "keterangan_risiko": "Risiko fatal Stevens-Johnson Syndrome."
-    },
-    {
-        "nama": "Irfan Hakim",
-        "nik": "7371020088990003",
-        "tanda_vital": {"td": "150/100 mmHg", "bb": "92 kg", "tb": "175 cm", "nadi": "92 x/mnt"},
-        "kondisi_saat_ini": "Obesitas Morbid & Dislipidemia",
-        "rsid_data": "rs9939609(A/A) - FTO, rs662(A/A) - PON1",
-        "keterangan_risiko": "Kecenderungan inflamasi vaskular genetik."
-    },
-    {
-        "nama": "Ahmad Fauzi",
-        "nik": "1171010099880005",
-        "tanda_vital": {"td": "135/85 mmHg", "bb": "65 kg", "tb": "168 cm", "nadi": "84 x/mnt"},
-        "kondisi_saat_ini": "Penyakit Jantung Koroner (Post-Stent)",
-        "rsid_data": "rs12248560(C/T) - CYP2C19 (Intermediate)",
-        "keterangan_risiko": "Respons antiplatelet suboptimal."
-    },
-    {
-        "nama": "Maria Walanda",
-        "nik": "7171040077660006",
-        "tanda_vital": {"td": "130/90 mmHg", "bb": "70 kg", "tb": "158 cm", "nadi": "82 x/mnt"},
-        "kondisi_saat_ini": "Artritis Reumatoid (Autoimun)",
-        "rsid_data": "rs2476601(A/G) - PTPN22",
-        "keterangan_risiko": "Sensitivitas tinggi terhadap agen imunomodulator."
-    },
-    {
-        "nama": "Andi Pratama",
-        "nik": "6471020033440007",
-        "tanda_vital": {"td": "115/75 mmHg", "bb": "78 kg", "tb": "180 cm", "nadi": "72 x/mnt"},
-        "kondisi_saat_ini": "Asma Bronkial Kronis",
-        "rsid_data": "rs1042713(A/G) - ADRB2",
-        "keterangan_risiko": "Variasi efikasi terapi bronkodilator."
-    },
-    {
-        "nama": "Samuel Tabuni",
-        "nik": "9171010055440008",
-        "tanda_vital": {"td": "140/95 mmHg", "bb": "82 kg", "tb": "172 cm", "nadi": "86 x/mnt"},
-        "kondisi_saat_ini": "Gout (Asam Urat) Akut",
-        "rsid_data": "rs2231142(G/T) - ABCG2",
-        "keterangan_risiko": "Ekskresi urat ginjal terganggu secara genetik."
-    },
-    {
-        "nama": "Dian Sastro",
-        "nik": "3273010011990009",
-        "tanda_vital": {"td": "110/70 mmHg", "bb": "55 kg", "tb": "163 cm", "nadi": "78 x/mnt"},
-        "kondisi_saat_ini": "Hipotiroidisme & Defisiensi Folat",
-        "rsid_data": "rs1801133(C/T) - MTHFR",
-        "keterangan_risiko": "Risiko tinggi hiperhomosisteinemia."
-    },
-    {
-        "nama": "Eko Prasetyo",
-        "nik": "3578020022880010",
-        "tanda_vital": {"td": "125/80 mmHg", "bb": "60 kg", "tb": "167 cm", "nadi": "74 x/mnt"},
-        "kondisi_saat_ini": "Gangguan Kecemasan & Depresi",
-        "rsid_data": "rs6265(C/T) - BDNF",
-        "keterangan_risiko": "Neuroplastisitas rendah; butuh pendekatan terapi holistik."
-    }
+    {"nama": "Budi Santoso", "nik": "3201010022330001", "ttv": {"td": "145/95", "bb": "85", "tb": "170", "n": "88"}, "kondisi": "Diabetes Melitus Tipe 2", "rsid": "rs7903146(T/T) - TCF7L2"},
+    {"nama": "Siti Aminah", "nik": "3171050044550002", "ttv": {"td": "110/70", "bb": "48", "tb": "155", "n": "76"}, "kondisi": "Kanker Payudara", "rsid": "rs1065852(G/G) - CYP2D6"},
+    {"nama": "Luh Putu Astuti", "nik": "5171030011220004", "ttv": {"td": "120/80", "bb": "52", "tb": "160", "n": "80"}, "kondisi": "Epilepsi", "rsid": "HLA-B*15:02 (Positif)"},
+    {"nama": "Irfan Hakim", "nik": "7371020088990003", "ttv": {"td": "150/100", "bb": "92", "tb": "175", "n": "92"}, "kondisi": "Obesitas Morbid", "rsid": "rs9939609(A/A) - FTO"},
+    {"nama": "Ahmad Fauzi", "nik": "1171010099880005", "ttv": {"td": "135/85", "bb": "65", "tb": "168", "n": "84"}, "kondisi": "Jantung Koroner", "rsid": "rs12248560(C/T)"},
+    {"nama": "Maria Walanda", "nik": "7171040077660006", "ttv": {"td": "130/90", "bb": "70", "tb": "158", "n": "82"}, "kondisi": "Artritis Reumatoid", "rsid": "rs2476601(A/G)"},
+    {"nama": "Andi Pratama", "nik": "6471020033440007", "ttv": {"td": "115/75", "bb": "78", "tb": "180", "n": "72"}, "kondisi": "Asma Bronkial", "rsid": "rs1042713(A/G)"},
+    {"nama": "Samuel Tabuni", "nik": "9171010055440008", "ttv": {"td": "140/95", "bb": "82", "tb": "172", "n": "86"}, "kondisi": "Gout Akut", "rsid": "rs2231142(G/T)"},
+    {"nama": "Dian Sastro", "nik": "3273010011990009", "ttv": {"td": "110/70", "bb": "55", "tb": "163", "n": "78"}, "kondisi": "Hipotiroidisme", "rsid": "rs1801133(C/T)"},
+    {"nama": "Eko Prasetyo", "nik": "3578020022880010", "ttv": {"td": "125/80", "bb": "60", "tb": "167", "n": "74"}, "kondisi": "Depresi Mayor", "rsid": "rs6265(C/T)"}
 ]
