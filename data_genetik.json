@@ -1,112 +1,82 @@
 [
-  {
-    "nama": "Budi Santoso",
-    "usia": 55,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "170 cm / 85 kg",
-    "etnis": "Jawa",
-    "kondisi_saat_ini": "Diabetes Melitus Tipe 2",
-    "rsid_data": "RS7903146(T/T), RS1229984(A/A)",
-    "keterangan_risiko": "Risiko tinggi komplikasi ginjal (Gen TCF7L2).",
-    "fokus_nutrigenomik": "Perlu kontrol glikemik ketat; saran penggunaan gula tebu kuning atau gula merah dalam dosis rendah sebagai pengganti gula rafinasi."
-  },
-  {
-    "nama": "Siti Aminah",
-    "usia": 42,
-    "jenis_kelamin": "Perempuan",
-    "tb_bb": "155 cm / 48 kg",
-    "etnis": "Bugis",
-    "kondisi_saat_ini": "Hiperlipidemia (Kolesterol Tinggi)",
-    "rsid_data": "RS4149056(C/C), RS4680(A/G)",
-    "keterangan_risiko": "Respon buruk terhadap obat Simvastatin (risiko nyeri otot tinggi).",
-    "fokus_nutrigenomik": "Diet tinggi omega-3 dan lemak tak jenuh dari sumber lokal."
-  },
-  {
-    "nama": "Dewi Sartika",
-    "usia": 28,
-    "jenis_kelamin": "Perempuan",
-    "tb_bb": "160 cm / 55 kg",
-    "etnis": "Sunda",
-    "kondisi_saat_ini": "Anemia & Kelelahan Kronis",
-    "rsid_data": "RS1801133(T/T), RS1042713(G/G)",
-    "keterangan_risiko": "Gangguan metabolisme folat (Gen MTHFR).",
-    "fokus_nutrigenomik": "Kebutuhan folat tinggi; hindari asam folat sintetik, fokus pada nutrisi alami."
-  },
-  {
-    "nama": "Nyoman Wahyu",
-    "usia": 35,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "175 cm / 70 kg",
-    "etnis": "Bali",
-    "kondisi_saat_ini": "Pasca Operasi Jantung (Pemasangan Ring)",
-    "rsid_data": "RS1799971(A/G), RS1057910(A/C)",
-    "keterangan_risiko": "Metabolisme lambat pada obat pengencer darah (Warfarin/Clopidogrel).",
-    "fokus_nutrigenomik": "Kontrol asupan Vitamin K untuk menjaga efektivitas obat."
-  },
-  {
-    "nama": "Ahmad Fauzi",
-    "usia": 60,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "165 cm / 78 kg",
-    "etnis": "Minang",
-    "kondisi_saat_ini": "Hipertensi",
-    "rsid_data": "RS1801278(G/A), RS5068(A/G)",
-    "keterangan_risiko": "Sensitivitas tinggi terhadap garam (Salt-sensitive hypertension).",
-    "fokus_nutrigenomik": "Diet rendah natrium; penggunaan rempah lokal sebagai pengganti garam."
-  },
-  {
-    "nama": "Lestari Putri",
-    "usia": 24,
-    "jenis_kelamin": "Perempuan",
-    "tb_bb": "158 cm / 50 kg",
-    "etnis": "Melayu",
-    "kondisi_saat_ini": "Asma Bronkial",
-    "rsid_data": "RS1042713(A/G), RS1800532(C/T)",
-    "keterangan_risiko": "Respon moderat terhadap inhaler Albuterol.",
-    "fokus_nutrigenomik": "Asupan antioksidan tinggi (Vitamin C & E) untuk kesehatan paru."
-  },
-  {
-    "nama": "Irfan Hakim",
-    "usia": 47,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "172 cm / 90 kg",
-    "etnis": "Betawi",
-    "kondisi_saat_ini": "Obesitas & Gejala Fatty Liver",
-    "rsid_data": "RS738409(G/G), RS1799883(C/T)",
-    "keterangan_risiko": "Risiko tinggi perlemakan hati non-alkohol (PNPLA3).",
-    "fokus_nutrigenomik": "Batasi fruktosa tinggi; gula merah lebih disarankan daripada sirup jagung fruktosa tinggi."
-  },
-  {
-    "nama": "Maria Ulfa",
-    "usia": 31,
-    "jenis_kelamin": "Perempuan",
-    "tb_bb": "150 cm / 45 kg",
-    "etnis": "Madura",
-    "kondisi_saat_ini": "Osteopenia dini",
-    "rsid_data": "RS1544410(A/A), RS731236(T/C)",
-    "keterangan_risiko": "Reseptor Vitamin D kurang efisien (Gen VDR).",
-    "fokus_nutrigenomik": "Memerlukan suplementasi Vitamin D3 dan kalsium lebih tinggi dari rata-rata."
-  },
-  {
-    "nama": "Rizky Pratama",
-    "usia": 19,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "180 cm / 65 kg",
-    "etnis": "Batak",
-    "kondisi_saat_ini": "Gastritis Kronis (Maag)",
-    "rsid_data": "RS1799953(C/T), RS1801280(T/T)",
-    "keterangan_risiko": "Sensitivitas tinggi terhadap makanan pedas dan kafein.",
-    "fokus_nutrigenomik": "Pola makan 'Little and Often'; hindari pemicu asam lambung."
-  },
-  {
-    "nama": "Andi Wijaya",
-    "usia": 52,
-    "jenis_kelamin": "Laki-laki",
-    "tb_bb": "168 cm / 72 kg",
-    "etnis": "Dayak",
-    "kondisi_saat_ini": "Asam Urat (Gout)",
-    "rsid_data": "RS2231142(G/G), RS1194222(C/T)",
-    "keterangan_risiko": "Ekskresi asam urat rendah melalui ginjal (Gen ABCG2).",
-    "fokus_nutrigenomik": "Hindari makanan tinggi purin; hidrasi sangat krusial."
-  }
+    {
+        "nama": "Budi Santoso",
+        "nik": "3201010022330001",
+        "tb_bb": "170 cm / 85 kg (TD: 145/95)",
+        "kondisi_saat_ini": "Diabetes Melitus Tipe 2 & Hipertensi",
+        "rsid_data": "rs7903146(T/T) - TCF7L2 (Risiko Tinggi), rs1229984(A/A) - ADH1B",
+        "keterangan_risiko": "Resistensi insulin genetik berat; metabolisme alkohol cepat."
+    },
+    {
+        "nama": "Siti Aminah",
+        "nik": "3171050044550002",
+        "tb_bb": "155 cm / 48 kg (TD: 110/70)",
+        "kondisi_saat_ini": "Kanker Payudara (Evaluasi Kemoterapi)",
+        "rsid_data": "rs1065852(G/G) - CYP2D6 (Metabolisme Lambat)",
+        "keterangan_risiko": "Risiko toksisitas Tamoxifen tinggi; dosis perlu penyesuaian."
+    },
+    {
+        "nama": "Irfan Hakim",
+        "nik": "7371020088990003",
+        "tb_bb": "175 cm / 92 kg (TD: 150/100)",
+        "kondisi_saat_ini": "Obesitas & Dislipidemia",
+        "rsid_data": "rs9939609(A/A) - FTO (Gen Obesitas), rs 662(A/A) - PON1",
+        "keterangan_risiko": "Kecenderungan penyimpanan lemak visceral tinggi."
+    },
+    {
+        "nama": "Luh Putu Astuti",
+        "nik": "5171030011220004",
+        "tb_bb": "160 cm / 52 kg (TD: 120/80)",
+        "kondisi_saat_ini": "Epilepsi (Evaluasi Karbamazepin)",
+        "rsid_data": "HLA-B*15:02 (Positif)",
+        "keterangan_risiko": "Risiko fatal Stevens-Johnson Syndrome jika diberikan Karbamazepin."
+    },
+    {
+        "nama": "Ahmad Fauzi",
+        "nik": "1171010099880005",
+        "tb_bb": "168 cm / 65 kg (TD: 130/85)",
+        "kondisi_saat_ini": "Penyakit Jantung Koroner",
+        "rsid_data": "rs12248560(C/T) - CYP2C19 (Intermediate Metabolizer)",
+        "keterangan_risiko": "Respons Clopidogrel suboptimal; pertimbangkan antiplatelet alternatif."
+    },
+    {
+        "nama": "Maria Walanda",
+        "nik": "7171040077660006",
+        "tb_bb": "158 cm / 70 kg (TD: 135/90)",
+        "kondisi_saat_ini": "Artritis Reumatoid",
+        "rsid_data": "rs2476601(A/G) - PTPN22",
+        "keterangan_risiko": "Kerentanan tinggi terhadap inflamasi autoimun."
+    },
+    {
+        "nama": "Andi Pratama",
+        "nik": "6471020033440007",
+        "tb_bb": "180 cm / 78 kg (TD: 115/75)",
+        "kondisi_saat_ini": "Asma Bronkial",
+        "rsid_data": "rs1042713(A/G) - ADRB2",
+        "keterangan_risiko": "Respons terhadap inhaler beta-agonis bervariasi."
+    },
+    {
+        "nama": "Samuel Tabuni",
+        "nik": "9171010055440008",
+        "tb_bb": "172 cm / 82 kg (TD: 140/95)",
+        "kondisi_saat_ini": "Hiperurisemia (Asam Urat)",
+        "rsid_data": "rs2231142(G/T) - ABCG2",
+        "keterangan_risiko": "Ekskresi asam urat terhambat; risiko tinggi pirai (gout)."
+    },
+    {
+        "nama": "Dian Sastro",
+        "nik": "3273010011990009",
+        "tb_bb": "163 cm / 55 kg (TD: 110/70)",
+        "kondisi_saat_ini": "Anemia & Gangguan Tiroid",
+        "rsid_data": "rs1801133(C/T) - MTHFR",
+        "keterangan_risiko": "Gangguan metabolisme folat; perlu suplementasi khusus."
+    },
+    {
+        "nama": "Eko Prasetyo",
+        "nik": "3578020022880010",
+        "tb_bb": "167 cm / 60 kg (TD: 125/80)",
+        "kondisi_saat_ini": "Depresi Mayor",
+        "rsid_data": "rs6265(C/T) - BDNF",
+        "keterangan_risiko": "Respons terhadap antidepresan SSRI mungkin lambat."
+    }
 ]
