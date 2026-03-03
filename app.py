@@ -12,8 +12,8 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# --- 2. THEME DESIGN (GABUNGAN STYLE 1 & 2) ---
-st.set_page_config(page_title="IndoGen-AI | Clinical Portal", layout="wide")
+# --- 2. THEME DESIGN (OPTIMAL & BERSIH) ---
+st.set_page_config(page_title="IndoGen-AI | Clinical Portal", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
     <style>
@@ -21,58 +21,53 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #F8FAFC; color: #1E293B; }
     
-    /* Header Style */
+    /* Hapus Tombol Geser Sidebar */
+    [data-testid="sidebar-button-container"] { display: none !important; }
+
     .his-header {
         background: white; padding: 25px; border-radius: 15px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border-left: 5px solid #3B82F6; margin-bottom: 20px;
     }
 
-    /* Dashboard Awal: Point Rapat Style */
+    /* Poin Data Pasien Awal */
     .patient-data-point {
         line-height: 1.1; margin-bottom: 0px; font-size: 0.95rem; color: #1E293B;
     }
     .label-bold { font-weight: 700; color: #1E3A8A; }
-    .instruction-step {
-        background: #F0F9FF; border-radius: 8px; padding: 15px;
-        border: 1px solid #BAE6FD; margin-bottom: 20px; color: #1E40AF; font-size: 0.85rem;
-    }
 
-    /* Dashboard Analisis: Report Card Mewah Style */
+    /* Hasil Analisis Mewah & Rapi */
     .report-card { 
-        background: white; padding: 40px; border-radius: 20px;
+        background: white; padding: 35px; border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #E2E8F0;
         line-height: 1.6; color: #334155; margin-bottom: 25px;
     }
 
-    /* Button Style */
+    /* List Poin Identitas di Dalam Analisis */
+    .analysis-info-list {
+        list-style-type: none; padding: 0; margin-bottom: 20px;
+        border-bottom: 1px solid #F1F5F9; padding-bottom: 15px;
+    }
+    .analysis-info-list li {
+        font-size: 0.95rem; margin-bottom: 4px;
+    }
+
     .stButton>button {
         background: #3B82F6; color: white; border-radius: 8px; font-weight: bold; width: 100%; height: 3em; border: none;
     }
-
-    /* Footer */
-    .engine-footer {
-        margin-top: 40px; padding: 15px; text-align: center;
-        border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 0.7rem;
-    }
-
-    /* Hilangkan tombol geser/collapse sidebar untuk tampilan permanen */
-    [data-testid="sidebar-button-container"] { display: none; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SIDEBAR (PILIH PASIEN) ---
+# --- 3. SIDEBAR (KONTROL KLINIS) ---
 with st.sidebar:
     st.markdown("### **IndoGen-AI HIS**")
     try:
         with open('data_genetik.json', 'r') as f:
             db_genom = json.load(f)
         
-        # Reset Logic
         if 'run_ai' in st.session_state and st.session_state.run_ai:
             if st.button("Sesi Baru"):
-                for key in list(st.session_state.keys()):
-                    del st.session_state[key]
+                for key in list(st.session_state.keys()): del st.session_state[key]
                 st.rerun()
             st.stop()
 
@@ -91,10 +86,11 @@ with st.sidebar:
                 st.session_state.run_ai = True
                 st.session_state.current_p = p
                 st.session_state.temp_obat = obat_input
+                st.session_state.temp_keluhan = keluhan_input
     except Exception as e:
         st.error(f"Data Error: {e}")
 
-# --- 4. DASHBOARD UTAMA (STYLE POIN RAPAT) ---
+# --- 4. DASHBOARD UTAMA (IDENTITAS AWAL) ---
 st.markdown(f"""
 <div class="his-header">
     <h2 style="margin:0; color:#1E3A8A; font-size:1.4rem;">Clinical Decision Support System</h2>
@@ -102,20 +98,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# PANDUAN (Hanya muncul sebelum Analisis)
-if 'run_ai' not in st.session_state:
-    st.markdown(f"""
-    <div class="instruction-step">
-        <b>Panduan Penggunaan Sistem:</b><br>
-        1. Pilih pasien pada kolom <b>Antrean Pasien</b>.<br>
-        2. Masukkan resep (misal: 'Karbamazepin') dan keluhan (misal: 'Kejang').<br>
-        3. Klik tombol <b>Analisa</b> untuk memulai sinkronisasi BGSi.
-    </div>
-    """, unsafe_allow_html=True)
-
-# Tampilan Data Pasien (Poin Rapat)
+# Data Pasien Singkat
 st.markdown(f"""
-<div style="background:white; padding:20px; border-radius:15px; border:1px solid #E2E8F0; margin-bottom:20px;">
+<div style="background:white; padding:18px; border-radius:15px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
     <div class="patient-data-point"><span class="label-bold">Diagnosis HIS:</span> {p['kondisi']}</div>
     <div class="patient-data-point"><span class="label-bold">TTV:</span> {p['ttv']['td']} mmHg | {p['ttv']['bb']} kg | {p['ttv']['tb']} cm</div>
@@ -123,48 +108,51 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 5. OUTPUT ANALISA (STYLE LAPORAN MEWAH & VALIDASI) ---
+# --- 5. OUTPUT ANALISA & VALIDASI ---
 if 'run_ai' in st.session_state and st.session_state.run_ai:
     p_active = st.session_state.current_p
     
     if 'ai_result' not in st.session_state:
-        with st.spinner("Mensinkronisasi Data Genomik..."):
+        with st.status("Memproses Analisa Genomik...", expanded=False):
             prompt = f"""
-            Pasien: {p_active['nama']} | Genetik: {p_active['rsid']} | Keluhan: {keluhan_input} | Obat: {st.session_state.temp_obat}
-            Berikan analisa: Diagnosis Kerja (%), Farmakogenomik, Nutrigenomik (sertakan gula merah/tebu kuning jika relevan), dan Paspor Genomik.
-            Format: Tanpa bold (**). Bahasa Medis Formal. Vancouver Style.
+            Buat analisa medis untuk {p_active['nama']}. 
+            Data Genetik: {p_active['rsid']}. Keluhan: {st.session_state.temp_keluhan}. Obat: {st.session_state.temp_obat}.
+            Berikan poin analisa: Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik.
+            Ketentuan: Vancouver Style, Tanpa bold (**), Bahasa Medis Formal.
             """
-            try:
-                response = model.generate_content(prompt)
-                st.session_state.ai_result = response.text.replace("**", "")
-            except Exception as e:
-                st.error(f"AI Error: {e}")
+            response = model.generate_content(prompt)
+            st.session_state.ai_result = response.text.replace("**", "")
 
-    # Tampilan Laporan Mewah
+    # HASIL ANALISIS (Bagian Atas yang Dirapikan)
     st.markdown("### Analisis Rekam Medis (AI)")
-    st.markdown(f'<div class="report-card">{st.session_state.ai_result}</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="report-card">
+        <ul class="analysis-info-list">
+            <li><b>Pasien:</b> {p_active['nama']}</li>
+            <li><b>Genotipe:</b> {p_active['rsid']}</li>
+            <li><b>Keluhan Utama:</b> {st.session_state.temp_keluhan}</li>
+            <li><b>Terapi Farmakologi:</b> {st.session_state.temp_obat}</li>
+        </ul>
+        {st.session_state.ai_result}
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Kolom Validasi Dokter (Terisi Otomatis)
+    # VALIDASI KLINIS (Hanya Penyakit dan Obat)
     st.markdown("---")
     st.markdown("### Validasi Klinis")
     
-    c1, c2 = st.columns(2)
-    with c1:
-        # Terisi otomatis dari diagnosa awal pasien
+    col1, col2 = st.columns(2)
+    with col1:
         st.text_input("Diagnosis Final:", value=p_active['kondisi'])
-    with c2:
-        # Terisi otomatis dari input rencana resep
+    with col2:
         st.text_input("Resep Final:", value=st.session_state.temp_obat)
     
-    # Text area laporan yang terisi otomatis hasil AI
-    st.text_area("Laporan Klinis Final:", value=st.session_state.ai_result, height=350)
-    
-    if st.button("Simpan ke EMR"):
-        st.success("Data berhasil divalidasi dan tersimpan di sistem rekam medis.")
+    if st.button("Simpan"):
+        st.success("Data klinis telah diverifikasi dan disimpan.")
 
 # --- 6. FOOTER ---
 st.markdown("""
-<div class="engine-footer">
+<div style="margin-top:40px; padding:15px; text-align:center; border-top:1px solid #E2E8F0; color:#94A3B8; font-size:0.7rem;">
     Powered by Gemini 3 Flash | Cloud AI Integration via Google Vertex API<br>
     IndoGen-AI Precision System © 2026
 </div>
