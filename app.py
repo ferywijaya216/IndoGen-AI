@@ -21,35 +21,36 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #F8FAFC; color: #1E293B; }
     
-    /* Header Utama */
     .his-header {
         background: white; padding: 25px; border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border-left: 5px solid #2563EB; margin-bottom: 20px;
     }
 
+    /* Kotak Panduan Penggunaan */
+    .instruction-step {
+        background: #F0F9FF; border-radius: 8px; padding: 15px;
+        border: 1px solid #BAE6FD; margin-bottom: 20px; color: #1E40AF; font-size: 0.85rem;
+    }
+
     /* Poin Data Pasien (Rapat) */
     .patient-data-point { line-height: 1.2; margin-bottom: 0px; font-size: 0.95rem; color: #1E293B; }
     .label-bold { font-weight: 700; color: #1E3A8A; }
 
-    /* Report Card */
+    /* Report Card Analisis */
     .report-card { 
         background: white; padding: 30px; border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
         line-height: 1.6; color: #334155; margin-bottom: 20px;
     }
 
-    /* Styling Poin Identitas Hasil Analisis agar Rapi */
     .analysis-info-list {
         margin: 0 0 20px 0; padding: 0; list-style: none;
         border-bottom: 2px solid #F1F5F9; padding-bottom: 15px;
     }
-    .analysis-info-list li {
-        font-size: 0.95rem; margin-bottom: 5px; color: #475569;
-    }
+    .analysis-info-list li { font-size: 0.95rem; margin-bottom: 5px; color: #475569; }
     .analysis-info-list b { color: #1E3A8A; }
 
-    /* Button Biru Modern */
     .stButton>button {
         background: #2563EB; color: white; border-radius: 6px;
         font-weight: 600; width: 100%; height: 3em; border: none;
@@ -97,7 +98,19 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Data Pasien Singkat
+# PANDUAN PENGGUNAAN STATIS (Sesuai PUEBI)
+if 'run_ai' not in st.session_state:
+    st.markdown(f"""
+    <div class="instruction-step">
+        <b>Panduan Penggunaan Sistem:</b><br>
+        Berikut adalah langkah pengoperasian sistem ini:<br>
+        1. Pilih nama pasien pada kolom <b>Antrean Pasien</b>.<br>
+        2. Masukkan nama obat pada kolom resep, misalnya: <b>'Karbamazepin'</b>.<br>
+        3. Masukkan gejala pada kolom observasi, misalnya: <b>'Kejang'</b>.<br>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Data Pasien Singkat (Selalu muncul)
 st.markdown(f"""
 <div style="background:white; padding:15px; border-radius:12px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
@@ -113,19 +126,14 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
     
     if 'ai_result' not in st.session_state:
         with st.spinner("Menjalankan Analisis Genomik..."):
-            prompt = f"""
-            Berikan laporan analisis medis untuk {p_active['nama']}. 
-            Data Genetik: {p_active['rsid']}. Keluhan: {st.session_state.temp_keluhan}. Obat: {st.session_state.temp_obat}.
-            Poin: Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik (sertakan gula merah/tebu kuning).
-            Format: Vancouver Style, Tanpa bold (**), Bahasa Medis Formal.
-            """
+            prompt = f"Berikan laporan analisis medis formal untuk {p_active['nama']}. Data Genetik: {p_active['rsid']}. Keluhan: {st.session_state.temp_keluhan}. Obat: {st.session_state.temp_obat}. Sertakan Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik (gula merah/tebu kuning). Vancouver Style, Tanpa bold (**), Bahasa Medis Formal."
             try:
                 response = model.generate_content(prompt)
                 st.session_state.ai_result = response.text.replace("**", "")
             except Exception as e:
                 st.error(f"AI Error: {e}")
 
-    # Hasil Analisis dengan Identitas Berbentuk Poin Rapi
+    # Hasil Analisis
     st.markdown("### Hasil Analisis Sistem")
     st.markdown(f"""
     <div class="report-card">
@@ -139,18 +147,15 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
     </div>
     """, unsafe_allow_html=True)
 
-    # Validasi Klinis Final
+    # Konfirmasi Klinis
     st.markdown("---")
     st.markdown("### Konfirmasi Klinis")
-    
     c1, c2 = st.columns(2)
-    with c1:
-        st.text_input("Diagnosis Final:", value=p_active['kondisi'])
-    with c2:
-        st.text_input("Resep Final:", value=st.session_state.temp_obat)
+    with c1: st.text_input("Diagnosis Final:", value=p_active['kondisi'])
+    with c2: st.text_input("Resep Final:", value=st.session_state.temp_obat)
     
     if st.button("Simpan"):
-        st.success("Data klinis berhasil divalidasi dan disimpan.")
+        st.success("Data berhasil disimpan.")
 
 # --- 6. FOOTER ---
 st.markdown("""
