@@ -10,8 +10,12 @@ st.set_page_config(page_title="IndoGen-AI", layout="wide")
 # ==============================
 # LOAD DATA JSON
 # ==============================
-with open("data_genetik.json", "r", encoding="utf-8") as f:
-    patients = json.load(f)
+try:
+    with open("data_genetik.json", "r", encoding="utf-8") as f:
+        patients = json.load(f)
+except FileNotFoundError:
+    st.error("File data_genetik.json tidak ditemukan.")
+    patients = []
 
 # ==============================
 # SIDEBAR
@@ -25,12 +29,13 @@ selected_label = st.sidebar.selectbox(
     patient_labels
 )
 
-selected_index = patient_labels.index(selected_label)
-selected_patient = patients[selected_index]
+if patients:
+    selected_index = patient_labels.index(selected_label)
+    selected_patient = patients[selected_index]
 
-resep = st.sidebar.text_input("Rencana Resep:")
-keluhan = st.sidebar.text_area("Keluhan Utama:")
-analisis_btn = st.sidebar.button("Analisis")
+    resep = st.sidebar.text_input("Rencana Resep:")
+    keluhan = st.sidebar.text_area("Keluhan Utama:")
+    analisis_btn = st.sidebar.button("Analisis")
 
 # ==============================
 # KONFIGURASI GEMINI ENGINE
@@ -61,7 +66,7 @@ st.markdown("""
 # ==============================
 # PANDUAN
 # ==============================
-if 'run_ai' not in st.session_state:
+if 'ai_result' not in st.session_state:
     st.markdown("""
     <div style="
         background-color:#EAF2FF;
@@ -85,46 +90,56 @@ main_col, info_col = st.columns([3,1])
 # DASHBOARD UTAMA
 # ==============================
 with main_col:
+    if patients:
+        st.markdown(f"""
+        <div style="
+            background-color:white;
+            padding:20px;
+            border-radius:15px;
+            margin-top:20px;">
+            <b>Nama:</b> {selected_patient['nama']}<br>
+            <b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
+            <b>TTV:</b> {selected_patient['ttv']['td']} mmHg | 
+                        {selected_patient['ttv']['bb']} kg | 
+                        {selected_patient['ttv']['tb']} cm | 
+                        Nadi {selected_patient['ttv']['n']} bpm<br>
+            <b>Data Genetik (RSID):</b> {selected_patient['rsid']}
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div style="
-        background-color:white;
-        padding:20px;
-        border-radius:15px;
-        margin-top:20px;">
-        <b>Nama:</b> {selected_patient['nama']}<br>
-        <b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
-        <b>TTV:</b> {selected_patient['ttv']['td']} mmHg | 
-                    {selected_patient['ttv']['bb']} kg | 
-                    {selected_patient['ttv']['tb']} cm | 
-                    Nadi {selected_patient['ttv']['n']} bpm<br>
-        <b>Data Genetik (RSID):</b> {selected_patient['rsid']}
-    </div>
-    """, unsafe_allow_html=True)
+        # ==============================
+        # LOGIKA ANALISIS AI DENGAN PENYIMPANAN STATE
+        # ==============================
+        if analisis_btn:
+            if resep and keluhan:
+                prompt = f"""
+                Pasien: {selected_patient['nama']}
+                Diagnosis: {selected_patient['kondisi']}
+                RSID: {selected_patient['rsid']}
+                Resep: {resep}
+                Keluhan: {keluhan}
+                Berikan analisis klinis berbasis farmakogenomik. Vancouver style, tanpa bold.
+                """
+                try:
+                    with st.spinner("Sedang memproses analisis..."):
+                        response = model.generate_content(prompt)
+                        st.session_state.ai_result = response.text
+                except Exception as e:
+                    if "429" in str(e):
+                        st.error("Server sedang sibuk (Quota Exceeded). Silakan tunggu sekitar 40 detik sebelum mencoba lagi.")
+                    else:
+                        st.error(f"Terjadi kesalahan: {e}")
+            else:
+                st.warning("Silakan isi Resep dan Keluhan terlebih dahulu.")
 
-    # ==============================
-    # ANALISIS AI
-    # ==============================
-    if analisis_btn and resep and keluhan:
-        st.session_state.run_ai = True
-
-        st.write("### Hasil Analisis AI")
-
-        prompt = f"""
-        Pasien: {selected_patient['nama']}
-        Diagnosis: {selected_patient['kondisi']}
-        RSID: {selected_patient['rsid']}
-        Resep: {resep}
-        Keluhan: {keluhan}
-
-        Berikan analisis klinis berbasis farmakogenomik.
-        """
-
-        try:
-            response = model.generate_content(prompt)
-            st.write(response.text)
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat analisis: {e}")
+        # Menampilkan hasil jika sudah ada di session_state
+        if 'ai_result' in st.session_state:
+            st.write("### Hasil Analisis AI")
+            st.markdown(f"""
+            <div style="background-color:white; padding:20px; border-radius:15px; border:1px solid #E2E8F0;">
+                {st.session_state.ai_result}
+            </div>
+            """, unsafe_allow_html=True)
 
 # ==============================
 # PANEL INFORMASI (SAMPING KANAN)
@@ -134,7 +149,6 @@ if "hide_warning" not in st.session_state:
 
 with info_col:
     if not st.session_state.hide_warning:
-
         st.markdown("""
         <div style="
             background-color: #FEF3C7;
@@ -146,10 +160,8 @@ with info_col:
         """, unsafe_allow_html=True)
 
         col_title, col_x = st.columns([5,1])
-
         with col_title:
             st.markdown("**Informasi Sistem**")
-
         with col_x:
             if st.button("✕", key="close_info"):
                 st.session_state.hide_warning = True
