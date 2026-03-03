@@ -8,60 +8,75 @@ try:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         model = genai.GenerativeModel('gemini-3-flash-preview') 
     else:
-        st.error("Credential Error: API Key tidak ditemukan.")
+        st.error("Credential Error: API Key tidak ditemukan di Secrets.")
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error Konfigurasi: {e}")
 
-# --- 2. DESAIN UI MODERN & PERBAIKAN SIMBOL SIDEBAR ---
+# --- 2. DESAIN UI MODERN (CSS TERINTEGRASI) ---
 st.set_page_config(page_title="IndoGen-AI | Portal Presisi", layout="wide")
 
+# CSS ini yang mengatur agar tampilan rapi dan poin data rapat
 st.markdown("""
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap');
+    
     html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #F8FAFC; }
     
+    /* Perbaikan Simbol Sidebar */
     .sidebar-icon {
         font-family: 'Material Icons'; font-size: 20px;
-        color: #1E3A8A; vertical-align: middle; margin-right: 5px;
+        color: #1E3A8A; vertical-align: middle; margin-right: 8px;
     }
 
+    /* Header Utama */
     .his-header {
         background: white; padding: 20px 30px; border-radius: 12px;
         border-left: 5px solid #2563EB; margin-bottom: 20px;
         box-shadow: 0 2px 15px rgba(0,0,0,0.02);
     }
 
+    /* Tampilan Point Rapat (Sesuai Permintaan) */
     .patient-data-point {
-        line-height: 1.1; margin-bottom: 0px; font-size: 0.95rem; color: #1E293B;
+        line-height: 1.1; margin-bottom: 0px; font-size: 0.92rem; color: #1E293B;
     }
     .label-bold { font-weight: 700; color: #1E3A8A; }
 
+    /* Kotak Panduan Penggunaan */
     .instruction-step {
         background: #F0F9FF; border-radius: 8px; padding: 15px;
         border: 1px solid #BAE6FD; margin-bottom: 20px; color: #1E40AF; font-size: 0.85rem;
     }
 
+    /* Kotak Hasil AI Statis */
     .ai-output-container {
         background: #FFFFFF; padding: 25px; border-radius: 12px;
         border: 1px solid #E2E8F0; margin-bottom: 25px;
-        line-height: 1.6; color: #334155;
+        line-height: 1.6; color: #334155; font-size: 0.95rem;
     }
 
+    /* Tombol Biru Modern */
     .stButton>button {
         background: #2563EB; color: white; border-radius: 6px;
         font-weight: 600; width: 100%; height: 3em; border: none;
     }
     
+    /* Footer Ringkas */
     .engine-footer {
         margin-top: 40px; padding: 15px; text-align: center;
         border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 0.7rem;
     }
+
+    /* Sorot Input Sidebar */
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(4),
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(5) {
+        border: 1px solid #2563EB; border-radius: 8px; padding: 5px; background: #F1F5F9;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SIDEBAR: KONTROL ---
+# --- 3. SIDEBAR: KONTROL KLINIS ---
 with st.sidebar:
     st.markdown('<i class="sidebar-icon">keyboard_double_arrow_right</i><span style="color:#1E3A8A; font-weight:600; font-size:1.1rem;">Kontrol Klinis</span>', unsafe_allow_html=True)
     
@@ -69,6 +84,7 @@ with st.sidebar:
         with open('data_genetik.json', 'r') as f:
             db_genom = json.load(f)
         
+        # Logika Reset dan Proteksi Sidebar
         if 'run_ai' in st.session_state and st.session_state.run_ai:
             st.info("Sesi Analisis Aktif")
             if st.button("Reset Analisis"):
@@ -92,9 +108,8 @@ with st.sidebar:
                 st.session_state.run_ai = True
                 st.session_state.current_p = p 
                 st.session_state.input_obat = obat_input
-
     except Exception as e:
-        st.error(f"Error Database: {e}")
+        st.error(f"Gagal memuat data: {e}")
 
 # --- 4. DASHBOARD UTAMA ---
 st.markdown(f"""
@@ -104,6 +119,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# Panduan Penggunaan Sesuai PUEBI
 if 'run_ai' not in st.session_state:
     st.markdown(f"""
     <div class="instruction-step">
@@ -115,7 +131,7 @@ if 'run_ai' not in st.session_state:
     </div>
     """, unsafe_allow_html=True)
 
-# DATA PASIEN (Rapat sesuai gambar)
+# Tampilan Data Pasien (Sangat Rapat)
 st.markdown(f"""
 <div style="background:white; padding:15px; border-radius:12px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
@@ -125,35 +141,33 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 5. OUTPUT ANALISIS & VALIDASI ---
+# --- 5. LOGIKA HASIL ANALISIS ---
 if 'run_ai' in st.session_state and st.session_state.run_ai:
     p_active = st.session_state.current_p
     
     if 'ai_result' not in st.session_state:
         with st.status("Sinkronisasi database genomik...", expanded=True) as status:
-            prompt = f"Berikan laporan medis formal singkat untuk Pasien {p_active['nama']} dengan Genetik {p_active['rsid']} dan obat {st.session_state.input_obat}. Sertakan Diagnosis (%), Farmakogenomik, dan Nutrigenomik. Tanpa bold (**). Referensi Vancouver."
+            prompt = f"Berikan laporan medis formal singkat untuk Pasien {p_active['nama']} dengan Genetik {p_active['rsid']} dan obat {st.session_state.input_obat}. Gunakan Vancouver Style. Sertakan Diagnosis (%), Farmakogenomik, dan Nutrigenomik. Tanpa bold (**)."
             response = model.generate_content(prompt)
             st.session_state.ai_result = response.text.replace("**", "")
             status.update(label="Analisis Selesai", state="complete", expanded=False)
 
-    # TAMPILAN 1: HASIL ANALISIS AI (Referensi Statis)
+    # 1. Hasil AI Statis (Referensi)
     st.markdown("### Hasil Analisis Sistem (AI)")
     st.markdown(f'<div class="ai-output-container">{st.session_state.ai_result}</div>', unsafe_allow_html=True)
 
-    # TAMPILAN 2: FORMULIR VALIDASI DOKTER (Bisa Diedit)
+    # 2. Form Validasi Dokter (Bisa Diedit)
     st.markdown("---")
     st.markdown("### Konfirmasi dan Validasi Dokter")
     
     col1, col2 = st.columns(2)
     with col1:
-        # Kolom diagnosa otomatis terisi dari data profil pasien
         final_diag = st.text_input("Final Diagnosis Penyakit:", value=p_active['kondisi'])
     with col2:
-        # Kolom resep otomatis terisi dari input sebelumnya
         final_med = st.text_input("Final Resep Obat:", value=st.session_state.input_obat)
     
-    # Text area laporan yang otomatis terisi hasil AI tapi bisa diedit total
-    editable_report = st.text_area("Final Laporan Klinis (Edit jika diperlukan):", value=st.session_state.ai_result, height=300)
+    # Text area edit otomatis terisi dari hasil AI
+    editable_report = st.text_area("Final Laporan Klinis (Dapat Diedit):", value=st.session_state.ai_result, height=300)
     
     if st.button("Simpan ke Rekam Medis Elektronik"):
         st.success("Data klinis berhasil divalidasi dan disimpan ke sistem EMR.")
