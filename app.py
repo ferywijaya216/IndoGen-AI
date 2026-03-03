@@ -12,24 +12,14 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# --- 2. DESAIN UI & FLOATING WINDOW ---
+# --- 2. DESAIN UI ---
 st.set_page_config(page_title="IndoGen-AI | Portal Presisi", layout="wide")
 
 st.markdown("""
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap');
     html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #F8FAFC; color: #1E293B; }
-    
-    /* Floating Window Notification */
-    .floating-info {
-        position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-        background: #FFFBEB; border: 1px solid #F59E0B; padding: 15px;
-        border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        max-width: 250px; font-size: 0.75rem; color: #92400E;
-    }
-
     .his-header {
         background: white; padding: 25px; border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -56,24 +46,12 @@ st.markdown("""
         background: #2563EB; color: white; border-radius: 6px;
         font-weight: 600; width: 100%; height: 3em; border: none;
     }
-    
-    /* Perbaikan Ikon Material */
-    .material-icons { vertical-align: middle; font-size: 1.2rem; }
     </style>
-
-    <div class="floating-info">
-        <b>Pemberitahuan:</b><br>
-        Sistem menggunakan <b>AI Gemini Free Tier</b>. Terdapat batasan kuota penggunaan dan kemungkinan layanan down saat permintaan tinggi.
-    </div>
 """, unsafe_allow_html=True)
 
 # --- 3. SIDEBAR ---
 with st.sidebar:
-    st.markdown("""
-        <h3 style='color:#1E3A8A; margin-top:-20px;'>
-            <span class="material-icons">keyboard_double_arrow_right</span> IndoGen-AI HIS
-        </h3>
-    """, unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#1E3A8A; margin-top:-20px;'>IndoGen-AI HIS</h3>", unsafe_allow_html=True)
     try:
         with open('data_genetik.json', 'r') as f:
             db_genom = json.load(f)
@@ -111,6 +89,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# PANDUAN PENGGUNAAN STATIS (Hanya muncul sebelum analisis)
 if 'run_ai' not in st.session_state:
     st.markdown(f"""
     <div class="instruction-step">
@@ -122,6 +101,7 @@ if 'run_ai' not in st.session_state:
     </div>
     """, unsafe_allow_html=True)
 
+# Data Pasien Singkat
 st.markdown(f"""
 <div style="background:white; padding:15px; border-radius:12px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
@@ -140,12 +120,14 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
             try:
                 prompt = f"Berikan laporan analisis medis formal untuk {p_active['nama']}. Data Genetik: {p_active['rsid']}. Keluhan: {st.session_state.temp_keluhan}. Obat: {st.session_state.temp_obat}. Sertakan Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik (gula merah/tebu kuning). Vancouver Style, Tanpa bold (**), Bahasa Medis Formal."
                 response = model.generate_content(prompt)
+                # Pastikan response sukses sebelum simpan ke session_state
                 if response.text:
                     st.session_state.ai_result = response.text.replace("**", "")
             except Exception as e:
-                st.error("Server sedang sibuk atau kuota habis. Silakan coba lagi nanti.")
-                st.session_state.run_ai = False
+                st.error(f"Gagal memanggil AI: {e}. Silakan klik tombol 'Analisis' lagi.")
+                st.session_state.run_ai = False # Reset status agar tidak error loop
 
+    # Tampilkan hanya jika ai_result SUDAH ADA (Mencegah AttributeError)
     if 'ai_result' in st.session_state:
         st.markdown("### Hasil Analisis Sistem")
         st.markdown(f"""
