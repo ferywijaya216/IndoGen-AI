@@ -12,7 +12,7 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# --- 2. DESAIN UI MODERN (PUEBI, RAPAT, & TUTORIAL) ---
+# --- 2. DESAIN UI MODERN (PUEBI & RAPAT) ---
 st.set_page_config(page_title="IndoGen-AI | Portal Presisi", layout="wide")
 
 st.markdown("""
@@ -27,25 +27,20 @@ st.markdown("""
         box-shadow: 0 2px 15px rgba(0,0,0,0.02);
     }
 
-    /* Tampilan Point Rapat Persis Gambar User */
+    /* Tampilan Point Rapat (Sesuai Gambar User) */
     .patient-data-point {
-        line-height: 1.2; margin-bottom: 0px; font-size: 0.95rem; color: #1E293B;
+        line-height: 1.1; margin-bottom: 2px; font-size: 0.95rem; color: #1E293B;
     }
     .label-bold { font-weight: 700; color: #1E3A8A; }
 
-    /* Gaya Instruksi Tutorial */
     .instruction-step {
         background: #F0F9FF; border-radius: 8px; padding: 15px;
-        border: 2px solid #2563EB; margin-bottom: 10px; color: #0369A1; font-size: 0.85rem;
+        border: 1px solid #BAE6FD; margin-bottom: 20px; color: #0369A1; font-size: 0.85rem;
     }
 
-    /* Efek Sorot Kolom Input Sidebar */
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(4),
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(5) {
-        border: 2px solid #2563EB;
-        border-radius: 8px;
-        padding: 5px;
-        background: #F0F9FF;
+    .report-area {
+        background: white; padding: 30px; border-radius: 12px;
+        border: 1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
 
     .stButton>button {
@@ -62,12 +57,13 @@ st.markdown("""
 
 # --- 3. SIDEBAR: KONTROL ---
 with st.sidebar:
-    st.markdown("<h3 style='color:#1E3A8A; margin-top:-20px;'>Kontrol Klinis</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#1E3A8A;'>Kontrol Klinis</h3>", unsafe_allow_html=True)
     
     try:
         with open('data_genetik.json', 'r') as f:
             db_genom = json.load(f)
         
+        # Proteksi: Jika sedang analisis, sidebar dikunci untuk mencegah error ganti profil
         if 'run_ai' in st.session_state and st.session_state.run_ai:
             st.info("Sesi Analisis Aktif")
             if st.button("Reset Analisis"):
@@ -84,12 +80,12 @@ with st.sidebar:
         obat_input = st.text_input("Rencana Resep:", placeholder="Metformin, dll")
         keluhan_input = st.text_area("Observasi Klinis:", placeholder="Input gejala...")
         
-        if st.button("Analisis"):
+        if st.button("Analisis"): # PUEBI: Analisis
             if not obat_input or not keluhan_input:
                 st.error("Data wajib diisi.")
             else:
                 st.session_state.run_ai = True
-                st.session_state.current_p = p 
+                st.session_state.current_p = p # Simpan data pasien terpilih ke state
 
     except Exception as e:
         st.error(f"Error Database: {e}")
@@ -102,22 +98,19 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# INSTRUKSI & TOMBOL TUTORIAL (Sesuai Revisi Dospem)
+# Instruksi Otomatis Sesuai Permintaan Dospem
 if 'run_ai' not in st.session_state:
     st.markdown(f"""
     <div class="instruction-step">
-        <b>Panduan Penggunaan Sistem:</b><br>
-        Jika Anda memerlukan bantuan dalam mengoperasikan sistem ini, silakan klik tombol bantuan di bawah atau ikuti langkah berikut:<br>
-        1. Pilih pasien <b>'Luh Putu Astuti'</b> pada antrean.<br>
+        <b>💡 Instruksi Penggunaan:</b><br>
+        1. Pilih pasien <b>'Luh Putu Astuti'</b> pada daftar antrean.<br>
         2. Masukkan <b>'Karbamazepin'</b> pada kolom resep.<br>
-        3. Masukkan <b>'Kejang'</b> pada kolom observasi.<br>
+        3. Masukkan <b>'Kejang'</b> pada observasi klinis.<br>
+        4. Klik tombol <b>'Analisis'</b> untuk sinkronisasi data genetik.
     </div>
     """, unsafe_allow_html=True)
-    
-    if st.button("Tutorial Interaktif"):
-        st.info("Perhatikan kolom yang disorot warna biru pada panel kiri. Masukkan data sesuai panduan di atas untuk memulai simulasi klinis.")
 
-# DATA PASIEN (Rapat sesuai gambar)
+# DATA PASIEN (Point Rapat Persis Gambar)
 st.markdown(f"""
 <div style="background:white; padding:15px; border-radius:12px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
@@ -137,10 +130,11 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
             response = model.generate_content(prompt)
             st.session_state.ai_result = response.text.replace("**", "")
 
-    st.markdown("### Validasi Rekam Medis")
+    st.markdown("### 📋 Validasi Rekam Medis")
     
     col1, col2 = st.columns(2)
     with col1:
+        # Perbaikan Error: Mengambil data langsung dari p_active, bukan session_state kosong
         final_diag = st.text_input("Konfirmasi Penyakit:", value=p_active['kondisi'])
     with col2:
         final_med = st.text_input("Final Resep Obat:", value=obat_input)
