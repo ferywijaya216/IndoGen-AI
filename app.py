@@ -12,7 +12,7 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# --- 2. THEME DESIGN (STARK MEDICAL PRECISION) ---
+# --- 2. DESAIN UI (PRESISI & MEDIS) ---
 st.set_page_config(page_title="IndoGen-AI | Portal Presisi", layout="wide")
 
 st.markdown("""
@@ -21,10 +21,7 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #F8FAFC; color: #1E293B; }
     
-    /* Hapus Tombol Geser Sidebar & Header Streamlit */
-    [data-testid="sidebar-button-container"] { display: none !important; }
-    header {visibility: hidden;}
-
+    /* Header Utama */
     .his-header {
         background: white; padding: 25px; border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -35,14 +32,14 @@ st.markdown("""
     .patient-data-point { line-height: 1.2; margin-bottom: 0px; font-size: 0.95rem; color: #1E293B; }
     .label-bold { font-weight: 700; color: #1E3A8A; }
 
-    /* Report Card (Analisis Berbasis Poin) */
+    /* Report Card */
     .report-card { 
         background: white; padding: 30px; border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
         line-height: 1.6; color: #334155; margin-bottom: 20px;
     }
 
-    /* Styling Poin Identitas Hasil Analisis */
+    /* Styling Poin Identitas Hasil Analisis agar Rapi */
     .analysis-info-list {
         margin: 0 0 20px 0; padding: 0; list-style: none;
         border-bottom: 2px solid #F1F5F9; padding-bottom: 15px;
@@ -52,6 +49,7 @@ st.markdown("""
     }
     .analysis-info-list b { color: #1E3A8A; }
 
+    /* Button Biru Modern */
     .stButton>button {
         background: #2563EB; color: white; border-radius: 6px;
         font-weight: 600; width: 100%; height: 3em; border: none;
@@ -91,7 +89,7 @@ with st.sidebar:
     except Exception as e:
         st.error(f"Error: {e}")
 
-# --- 4. DASHBOARD UTAMA (STASIUN KERJA DOKTER) ---
+# --- 4. DASHBOARD UTAMA ---
 st.markdown(f"""
 <div class="his-header">
     <h2 style="margin:0; color:#1E3A8A; font-size:1.3rem;">Clinical Decision Support System</h2>
@@ -99,7 +97,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Identitas Pasien (Poin Rapat)
+# Data Pasien Singkat
 st.markdown(f"""
 <div style="background:white; padding:15px; border-radius:12px; border:1px solid #E2E8F0; margin-bottom:20px;">
     <div class="patient-data-point"><span class="label-bold">Nama:</span> {p['nama']}</div>
@@ -114,12 +112,12 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
     p_active = st.session_state.current_p
     
     if 'ai_result' not in st.session_state:
-        with st.spinner("Menjalankan Algoritma Analisis..."):
+        with st.spinner("Menjalankan Analisis Genomik..."):
             prompt = f"""
-            Buat laporan analisis medis formal untuk {p_active['nama']}. 
+            Berikan laporan analisis medis untuk {p_active['nama']}. 
             Data Genetik: {p_active['rsid']}. Keluhan: {st.session_state.temp_keluhan}. Obat: {st.session_state.temp_obat}.
-            Sertakan: Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik (gula merah/tebu kuning).
-            Aturan: Vancouver Style, Tanpa bold (**), Bahasa Medis Formal.
+            Poin: Diagnosis Kerja (%), Farmakogenomik, dan Nutrigenomik (sertakan gula merah/tebu kuning).
+            Format: Vancouver Style, Tanpa bold (**), Bahasa Medis Formal.
             """
             try:
                 response = model.generate_content(prompt)
@@ -127,7 +125,7 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
             except Exception as e:
                 st.error(f"AI Error: {e}")
 
-    # Tampilan Hasil Analisis (Poin Identitas Dirapikan)
+    # Hasil Analisis dengan Identitas Berbentuk Poin Rapi
     st.markdown("### Hasil Analisis Sistem")
     st.markdown(f"""
     <div class="report-card">
@@ -135,13 +133,13 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
             <li><b>Pasien:</b> {p_active['nama']}</li>
             <li><b>Genotipe:</b> {p_active['rsid']}</li>
             <li><b>Keluhan:</b> {st.session_state.temp_keluhan}</li>
-            <li><b>Rencana Terapi:</b> {st.session_state.temp_obat}</li>
+            <li><b>Terapi:</b> {st.session_state.temp_obat}</li>
         </ul>
         {st.session_state.ai_result}
     </div>
     """, unsafe_allow_html=True)
 
-    # Validasi Dokter
+    # Validasi Klinis Final
     st.markdown("---")
     st.markdown("### Konfirmasi Klinis")
     
@@ -152,7 +150,7 @@ if 'run_ai' in st.session_state and st.session_state.run_ai:
         st.text_input("Resep Final:", value=st.session_state.temp_obat)
     
     if st.button("Simpan"):
-        st.success("Analisis genomik berhasil disimpan ke database pasien.")
+        st.success("Data klinis berhasil divalidasi dan disimpan.")
 
 # --- 6. FOOTER ---
 st.markdown("""
