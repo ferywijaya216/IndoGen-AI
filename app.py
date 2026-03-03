@@ -105,8 +105,9 @@ if 'run_ai' not in st.session_state:
         <b>Panduan Penggunaan Sistem:</b><br>
         Berikut adalah langkah pengoperasian sistem ini:<br>
         1. Pilih nama pasien pada kolom <b>Antrean Pasien</b>.<br>
-        2. Masukkan nama obat pada kolom resep, misalnya: <b>'Karbamazepin'</b>.<br>
-        3. Masukkan gejala pada kolom observasi, misalnya: <b>'Kejang'</b>.<br>
+        2. Masukkan nama obat pada kolom resep, misalnya: <b>Karbamazepin</b>.<br>
+        3. Masukkan gejala pada kolom observasi, misalnya: <b>Kejang</b>.<br>
+        4. Tekan tombol <b>Analisis</b>.<br>
     </div>
     """, unsafe_allow_html=True)
 
@@ -163,3 +164,4 @@ st.markdown("""
     IndoGen-AI Precision System © 2026 | Powered by Gemini 3 Flash
 </div>
 """, unsafe_allow_html=True)
+
