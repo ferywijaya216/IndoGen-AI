@@ -12,7 +12,7 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# --- 2. DESAIN UI MODERN (PUEBI, RAPAT, & TUTORIAL) ---
+# --- 2. DESAIN UI MODERN (PUEBI & RAPAT) ---
 st.set_page_config(page_title="IndoGen-AI | Portal Presisi", layout="wide")
 
 st.markdown("""
@@ -33,19 +33,19 @@ st.markdown("""
     }
     .label-bold { font-weight: 700; color: #1E3A8A; }
 
-    /* Gaya Instruksi Tutorial */
+    /* Gaya Instruksi Statis */
     .instruction-step {
         background: #F0F9FF; border-radius: 8px; padding: 15px;
-        border: 2px solid #2563EB; margin-bottom: 10px; color: #0369A1; font-size: 0.85rem;
+        border: 1px solid #BAE6FD; margin-bottom: 20px; color: #1E40AF; font-size: 0.85rem;
     }
 
     /* Efek Sorot Kolom Input Sidebar */
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(4),
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:nth-child(5) {
-        border: 2px solid #2563EB;
+        border: 1px solid #2563EB;
         border-radius: 8px;
         padding: 5px;
-        background: #F0F9FF;
+        background: #F1F5F9;
     }
 
     .stButton>button {
@@ -81,8 +81,8 @@ with st.sidebar:
         p = next(item for item in db_genom if item["nama"] == p_name)
         
         st.markdown("---")
-        obat_input = st.text_input("Rencana Resep:", placeholder="Metformin, dll")
-        keluhan_input = st.text_area("Observasi Klinis:", placeholder="Input gejala...")
+        obat_input = st.text_input("Rencana Resep:", placeholder="Contoh: Karbamazepin")
+        keluhan_input = st.text_area("Observasi Klinis:", placeholder="Contoh: Kejang")
         
         if st.button("Analisis"):
             if not obat_input or not keluhan_input:
@@ -102,20 +102,17 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# INSTRUKSI & TOMBOL TUTORIAL (Sesuai Revisi Dospem)
+# PANDUAN PENGGUNAAN STATIS (Sesuai PUEBI)
 if 'run_ai' not in st.session_state:
     st.markdown(f"""
     <div class="instruction-step">
         <b>Panduan Penggunaan Sistem:</b><br>
-        Jika Anda memerlukan bantuan dalam mengoperasikan sistem ini, silakan klik tombol bantuan di bawah atau ikuti langkah berikut:<br>
-        1. Pilih pasien <b>'Luh Putu Astuti'</b> pada antrean.<br>
-        2. Masukkan <b>'Karbamazepin'</b> pada kolom resep.<br>
-        3. Masukkan <b>'Kejang'</b> pada kolom observasi.<br>
+        Berikut adalah langkah pengoperasian sistem ini:<br>
+        1. Pilih nama pasien pada kolom <b>Daftar Antrean Pasien</b>.<br>
+        2. Masukkan nama obat pada kolom resep, misalnya: <b>'Karbamazepin'</b>.<br>
+        3. Masukkan gejala pada kolom observasi, misalnya: <b>'Kejang'</b>.<br>
     </div>
     """, unsafe_allow_html=True)
-    
-    if st.button("Tutorial Interaktif"):
-        st.info("Perhatikan kolom yang disorot warna biru pada panel kiri. Masukkan data sesuai panduan di atas untuk memulai simulasi klinis.")
 
 # DATA PASIEN (Rapat sesuai gambar)
 st.markdown(f"""
