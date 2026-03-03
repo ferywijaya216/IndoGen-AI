@@ -1,41 +1,39 @@
 import streamlit as st
-
-st.set_page_config(page_title="IndoGen-AI HIS", layout="wide")
-
-# ==============================
-# ICON FIX (KIRI ATAS JADI PANAH)
-# ==============================
-st.markdown("""
-<style>
-.arrow-icon {
-    font-size: 28px;
-    font-weight: bold;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.sidebar.markdown(
-    '<div class="arrow-icon">⇒</div>',
-    unsafe_allow_html=True
-)
-
-st.sidebar.title("IndoGen-AI HIS")
+import google.generativeai as genai
+import json
 
 # ==============================
-# SIDEBAR CONTENT
+# PAGE CONFIG
 # ==============================
-st.sidebar.selectbox(
+st.set_page_config(page_title="IndoGen-AI", layout="wide")
+
+# ==============================
+# LOAD JSON DATA
+# ==============================
+with open("data_genetik.json", "r", encoding="utf-8") as f:
+    patients = json.load(f)
+
+# ==============================
+# SIDEBAR
+# ==============================
+st.sidebar.title("IndoGen-AI")
+
+patient_names = [f"{p['nama']} - {p['nik']}" for p in patients]
+
+selected_label = st.sidebar.selectbox(
     "Antrean Pasien (HIS):",
-    ["Budi Santoso - 3201010"]
+    patient_names
 )
 
-st.sidebar.text_input("Rencana Resep:")
-st.sidebar.text_area("Keluhan Utama:")
+selected_index = patient_names.index(selected_label)
+selected_patient = patients[selected_index]
 
-st.sidebar.button("Analisis")
+resep = st.sidebar.text_input("Rencana Resep:")
+keluhan = st.sidebar.text_area("Keluhan Utama:")
+analisis_btn = st.sidebar.button("Analisis")
 
 # ==============================
-# HEADER (TANPA TAMBAHAN PANAH)
+# HEADER (TIDAK DIUBAH)
 # ==============================
 st.markdown("""
 <div style="
@@ -67,35 +65,41 @@ if 'run_ai' not in st.session_state:
     """, unsafe_allow_html=True)
 
 # ==============================
-# DATA PASIEN
+# DATA PASIEN (DINAMIS DARI JSON)
 # ==============================
-st.markdown("""
+st.markdown(f"""
 <div style="
     background-color:white;
     padding:20px;
     border-radius:15px;
     margin-top:20px;">
-    <b>Nama:</b> Budi Santoso<br>
-    <b>Diagnosis HIS:</b> Diabetes Melitus Tipe 2<br>
-    <b>TTV:</b> 145/95 mmHg | 85 kg | 170 cm<br>
-    <b>Data Genetik (RSID):</b> rs7903146(T/T) – TCF7L2
+    <b>Nama:</b> {selected_patient['nama']}<br>
+    <b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
+    <b>TTV:</b> {selected_patient['ttv']['td']} mmHg | 
+                {selected_patient['ttv']['bb']} kg | 
+                {selected_patient['ttv']['tb']} cm | 
+                Nadi {selected_patient['ttv']['n']} bpm<br>
+    <b>Data Genetik (RSID):</b> {selected_patient['rsid']}
 </div>
 """, unsafe_allow_html=True)
 
 # ==============================
-# FLOATING WINDOW (X DI DALAM KOTAK)
+# FLOATING WINDOW (X DI DALAM BOX)
 # ==============================
 if "hide_warning" not in st.session_state:
     st.session_state.hide_warning = False
 
 if not st.session_state.hide_warning:
+
+    close_btn = st.button("✕", key="close_warning")
+
     st.markdown("""
     <style>
     .floating-box {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 340px;
+        width: 360px;
         background-color: #FEF3C7;
         padding: 20px;
         border-radius: 12px;
@@ -103,36 +107,54 @@ if not st.session_state.hide_warning:
         border-left: 6px solid #F59E0B;
         z-index: 9999;
     }
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
+    .floating-title {
         font-weight: bold;
-        cursor: pointer;
-        font-size:18px;
+        margin-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    close = st.button("✕", key="close_floating")
+    st.markdown("""
+    <div class="floating-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="floating-title">Informasi Sistem</div>
+        </div>
+        Sistem ini menggunakan layanan Google Gemini Free Tier.
+        Layanan memiliki batasan kuota API dan dapat mengalami kepadatan trafik.
+        Apabila terjadi keterlambatan analisis,
+        silakan mencoba kembali beberapa saat kemudian.
+    </div>
+    """, unsafe_allow_html=True)
 
-    if close:
+    if close_btn:
         st.session_state.hide_warning = True
         st.rerun()
 
-    st.markdown("""
-    <div class="floating-box">
-        <div style="position:relative;">
-            <div style="position:absolute; top:0; right:0;">
-            </div>
-            <b>Informasi Sistem</b><br><br>
-            Sistem ini menggunakan layanan Google Gemini Free Tier.
-            Layanan memiliki batasan kuota API dan dapat mengalami kepadatan trafik.
-            Apabila terjadi keterlambatan analisis,
-            silakan mencoba kembali beberapa saat kemudian.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+# ==============================
+# ANALISIS GEMINI (TIDAK DIUBAH STRUKTUR)
+# ==============================
+if analisis_btn and resep and keluhan:
+    st.session_state.run_ai = True
+
+    st.write("### Hasil Analisis AI")
+
+    prompt = f"""
+    Pasien: {selected_patient['nama']}
+    Diagnosis: {selected_patient['kondisi']}
+    RSID: {selected_patient['rsid']}
+    Resep: {resep}
+    Keluhan: {keluhan}
+
+    Berikan analisis klinis berbasis farmakogenomik.
+    """
+
+    try:
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        st.write(response.text)
+    except Exception as e:
+        st.error(f"Terjadi kesalahan: {e}")
 
 # ==============================
 # FOOTER
@@ -140,6 +162,6 @@ if not st.session_state.hide_warning:
 st.markdown("""
 <hr>
 <center>
-IndoGen-AI Precision System © 2026 | Powered by Gemini 3 Flash
+IndoGen-AI Precision System © 2026 | Powered by Gemini 1.5 Flash
 </center>
 """, unsafe_allow_html=True)
