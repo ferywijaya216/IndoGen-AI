@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import json
+import time
 
 # ==============================
 # PAGE CONFIG
@@ -8,65 +9,78 @@ import json
 st.set_page_config(page_title="IndoGen-AI", layout="wide")
 
 # ==============================
-# LOAD DATA JSON (CACHE)
+# LOAD DATA JSON
 # ==============================
-@st.cache_data
-def load_data():
-    try:
-        with open("data_genetik.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return []
-
-patients = load_data()
+try:
+    with open("data_genetik.json", "r", encoding="utf-8") as f:
+        patients = json.load(f)
+except FileNotFoundError:
+    st.error("File data_genetik.json tidak ditemukan.")
+    patients = []
 
 # ==============================
-# GEMINI CONFIG
+# GEMINI CONFIG (API dari secrets)
 # ==============================
-model = None
 try:
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-1.5-flash")
     else:
-        st.error("Credential Error: API Key tidak ditemukan.")
+        st.error("API Key tidak ditemukan di Streamlit Secrets.")
 except Exception as e:
-    st.error(f"AI Engine Error: {e}")
+    st.error(f"Error konfigurasi AI: {e}")
+
+# ==============================
+# FUNCTION AI ANALYSIS (ANTI ERROR)
+# ==============================
+def run_ai_analysis(prompt):
+
+    max_retry = 3
+
+    for attempt in range(max_retry):
+
+        try:
+
+            response = model.generate_content(
+                prompt,
+                request_options={"timeout": 30}
+            )
+
+            return response.text
+
+        except Exception as e:
+
+            error_text = str(e)
+
+            if "429" in error_text or "503" in error_text or "504" in error_text:
+
+                if attempt < max_retry - 1:
+                    time.sleep(3)
+                    continue
+                else:
+                    return "Server AI sedang sibuk. Silakan coba beberapa saat lagi."
+
+            return f"Terjadi error sistem: {e}"
 
 # ==============================
 # SIDEBAR
 # ==============================
 st.sidebar.title("IndoGen-AI")
 
-if patients:
+patient_labels = [f"{p['nama']} - {p['nik']}" for p in patients]
 
-    patient_labels = [f"{p['nama']} - {p['nik']}" for p in patients]
+selected_label = st.sidebar.selectbox(
+    "Antrean Pasien (HIS):",
+    patient_labels
+)
 
-    selected_label = st.sidebar.selectbox(
-        "Antrean Pasien (HIS):",
-        patient_labels
-    )
+selected_index = patient_labels.index(selected_label)
+selected_patient = patients[selected_index]
 
-    selected_index = patient_labels.index(selected_label)
-    selected_patient = patients[selected_index]
+resep = st.sidebar.text_input("Rencana Resep:", "Karbamazepin")
+keluhan = st.sidebar.text_area("Keluhan Utama:", "Kejang")
 
-    resep = st.sidebar.text_input("Rencana Resep:")
-    keluhan = st.sidebar.text_area("Keluhan Utama:")
-    analisis_btn = st.sidebar.button("Analisis")
-
-else:
-    st.sidebar.error("Data pasien tidak ditemukan.")
-
-# ==============================
-# RESET SESSION JIKA GANTI PASIEN
-# ==============================
-if "last_patient" not in st.session_state:
-    st.session_state.last_patient = None
-
-if patients:
-    if st.session_state.last_patient != selected_label:
-        st.session_state.ai_result = None
-        st.session_state.last_patient = selected_label
+analisis_btn = st.sidebar.button("Analisis")
 
 # ==============================
 # HEADER
@@ -83,9 +97,15 @@ border-left:6px solid #2E6BE6;">
 """, unsafe_allow_html=True)
 
 # ==============================
-# PANDUAN
+# SESSION STATE
 # ==============================
-if 'ai_result' not in st.session_state:
+if "ai_result" not in st.session_state:
+    st.session_state.ai_result = None
+
+# ==============================
+# PANDUAN PENGGUNAAN
+# ==============================
+if not st.session_state.ai_result:
 
     st.markdown("""
     <div style="
@@ -94,12 +114,12 @@ if 'ai_result' not in st.session_state:
     border-radius:10px;
     margin-top:20px;">
 
-    <b>Panduan Penggunaan Sistem:</b><br>
+    <b>Panduan Penggunaan Sistem:</b><br><br>
 
-    1. Pilih nama pasien pada kolom <b>Antrean Pasien</b>.<br>
-    2. Masukkan nama obat pada kolom resep.<br>
-    3. Masukkan gejala atau keluhan pasien.<br>
-    4. Tekan tombol <b>Analisis</b> untuk mendapatkan rekomendasi klinis berbasis genomik.
+    1. Pilih pasien pada kolom <b>Antrean Pasien</b>.<br>
+    2. Masukkan rencana resep obat.<br>
+    3. Masukkan keluhan utama pasien.<br>
+    4. Tekan tombol <b>Analisis</b> untuk mendapatkan rekomendasi terapi presisi berbasis genomik.
 
     </div>
     """, unsafe_allow_html=True)
@@ -114,121 +134,72 @@ main_col, info_col = st.columns([3,1])
 # ==============================
 with main_col:
 
-    if patients:
+    st.markdown(f"""
+    <div style="
+    background-color:white;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;">
+
+    <b>Nama:</b> {selected_patient['nama']}<br>
+    <b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
+    <b>TTV:</b> {selected_patient['ttv']['td']} mmHg |
+               {selected_patient['ttv']['bb']} kg |
+               {selected_patient['ttv']['tb']} cm |
+               Nadi {selected_patient['ttv']['n']} bpm<br>
+    <b>Data Genetik (RSID):</b> {selected_patient['rsid']}
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ==============================
+    # ANALISIS AI
+    # ==============================
+
+    if analisis_btn:
+
+        if resep and keluhan:
+
+            prompt = f"""
+Pasien: {selected_patient['nama']}
+Diagnosis: {selected_patient['kondisi']}
+Genetik: {selected_patient['rsid']}
+Resep Dokter: {resep}
+Keluhan: {keluhan}
+
+Buat analisis klinis berbasis farmakogenomik dan nutrigenomik.
+
+Evaluasi kecocokan obat dengan profil genetik pasien.
+Jika obat kurang sesuai, berikan alternatif terapi.
+Sertakan estimasi diagnosis dalam persen.
+
+Gunakan bahasa ilmiah singkat.
+Gunakan referensi Vancouver style.
+"""
+
+            with st.spinner("Menganalisis data genomik pasien..."):
+                result = run_ai_analysis(prompt)
+                st.session_state.ai_result = result
+
+        else:
+            st.warning("Silakan isi resep dan keluhan terlebih dahulu.")
+
+    if st.session_state.ai_result:
+
+        st.write("### Hasil Analisis AI")
 
         st.markdown(f"""
         <div style="
         background-color:white;
         padding:20px;
         border-radius:15px;
-        margin-top:20px;
-        border:1px solid #E5E7EB">
-
-        <b>Nama:</b> {selected_patient['nama']}<br>
-        <b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
-
-        <b>TTV:</b>
-        {selected_patient['ttv']['td']} mmHg |
-        {selected_patient['ttv']['bb']} kg |
-        {selected_patient['ttv']['tb']} cm |
-        Nadi {selected_patient['ttv']['n']} bpm<br>
-
-        <b>Data Genetik (RSID):</b> {selected_patient['rsid']}
-
+        border:1px solid #E2E8F0;">
+        {st.session_state.ai_result}
         </div>
         """, unsafe_allow_html=True)
 
-        # ==============================
-        # RULE ENGINE FARMACOGENOMIK
-        # ==============================
-        alert = ""
-
-        if "HLA-B*15:02" in selected_patient["rsid"]:
-            if resep and "carbamazepine" in resep.lower():
-                alert = "⚠ Risiko Stevens-Johnson Syndrome tinggi pada pasien HLA-B*15:02 positif. Hindari Carbamazepine."
-
-        if "CYP2D6" in selected_patient["rsid"]:
-            alert = "⚠ Variasi gen CYP2D6 dapat mempengaruhi metabolisme beberapa obat psikiatri dan analgesik."
-
-        if "FTO" in selected_patient["rsid"]:
-            alert = "⚠ Varian FTO berkaitan dengan peningkatan risiko obesitas dan respon diet."
-
-        if alert:
-            st.error(alert)
-
-        # ==============================
-        # ANALISIS AI
-        # ==============================
-        if analisis_btn:
-
-            if resep and keluhan:
-
-                if model is None:
-                    st.error("AI engine belum aktif.")
-                else:
-
-                    prompt = f"""
-                    Sistem Clinical Decision Support genomik.
-
-                    Data pasien:
-                    Nama: {selected_patient['nama']}
-                    Diagnosis awal: {selected_patient['kondisi']}
-                    Marker genetik: {selected_patient['rsid']}
-
-                    Rencana terapi dokter:
-                    {resep}
-
-                    Keluhan:
-                    {keluhan}
-
-                    Berikan analisis ringkas:
-
-                    1. Interpretasi farmakogenomik
-                    2. Evaluasi kesesuaian obat
-                    3. Alternatif terapi jika perlu
-                    4. Rekomendasi nutrigenomik
-                    5. Probabilitas diagnosis (%)
-
-                    Gunakan bahasa klinis singkat.
-                    """
-
-                    try:
-
-                        with st.spinner("Menganalisis data genomik pasien..."):
-                            response = model.generate_content(prompt)
-                            st.session_state.ai_result = response.text
-
-                    except Exception as e:
-
-                        if "429" in str(e):
-                            st.error("Server AI sedang sibuk. Coba lagi beberapa saat.")
-                        else:
-                            st.error(f"Error: {e}")
-
-            else:
-                st.warning("Silakan isi Resep dan Keluhan terlebih dahulu.")
-
-        # ==============================
-        # HASIL ANALISIS
-        # ==============================
-        if 'ai_result' in st.session_state and st.session_state.ai_result:
-
-            st.write("### Hasil Analisis AI")
-
-            st.markdown(f"""
-            <div style="
-            background-color:white;
-            padding:20px;
-            border-radius:15px;
-            border:1px solid #E5E7EB">
-
-            {st.session_state.ai_result}
-
-            </div>
-            """, unsafe_allow_html=True)
-
 # ==============================
-# PANEL INFORMASI
+# PANEL INFO
 # ==============================
 if "hide_warning" not in st.session_state:
     st.session_state.hide_warning = False
@@ -237,28 +208,29 @@ with info_col:
 
     if not st.session_state.hide_warning:
 
-        st.markdown("""
-        <div style="
-        background-color:#FEF3C7;
-        padding:20px;
-        border-radius:12px;
-        border-left:6px solid #F59E0B;
-        margin-top:20px;">
+        box = st.container()
 
-        <b>Informasi Sistem</b><br><br>
+        with box:
 
-        Sistem ini merupakan prototipe Clinical Decision Support System
-        berbasis farmakogenomik dan nutrigenomik.
+            col1, col2 = st.columns([6,1])
 
-        Analisis dilakukan menggunakan model AI dan data genomik
-        pasien untuk mendukung terapi presisi.
+            with col1:
+                st.markdown("**Informasi Sistem**")
 
-        </div>
-        """, unsafe_allow_html=True)
+            with col2:
+                if st.button("✕"):
+                    st.session_state.hide_warning = True
+                    st.rerun()
 
-        if st.button("Tutup Informasi"):
-            st.session_state.hide_warning = True
-            st.rerun()
+            st.markdown("""
+Sistem ini menggunakan layanan AI Google Gemini Free Tier.
+
+Pada kondisi tertentu, server AI dapat mengalami kepadatan trafik
+atau pembatasan kuota API sehingga analisis membutuhkan waktu
+lebih lama.
+
+Apabila terjadi keterlambatan, silakan mencoba kembali beberapa saat kemudian.
+""")
 
 # ==============================
 # FOOTER
@@ -266,6 +238,6 @@ with info_col:
 st.markdown("""
 <hr>
 <center>
-IndoGen-AI Precision System © 2026 | Powered by Gemini AI
+IndoGen-AI Precision System © 2026 | Powered by Gemini
 </center>
 """, unsafe_allow_html=True)
