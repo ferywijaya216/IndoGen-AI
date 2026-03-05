@@ -24,7 +24,7 @@ except FileNotFoundError:
 try:
     if "GEMINI_API_KEY" in st.secrets:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-3-flash-preview")
     else:
         st.error("API Key tidak ditemukan di Streamlit Secrets.")
 except Exception as e:
@@ -241,3 +241,4 @@ st.markdown("""
 IndoGen-AI Precision System © 2026 | Powered by Gemini
 </center>
 """, unsafe_allow_html=True)
+
