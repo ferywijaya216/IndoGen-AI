@@ -26,6 +26,16 @@ except:
     st.error("API KEY GROQ belum diatur di Streamlit Secrets")
 
 # ==============================
+# SESSION INIT
+# ==============================
+
+if "resep_sidebar" not in st.session_state:
+    st.session_state.resep_sidebar = ""
+
+if "keluhan_sidebar" not in st.session_state:
+    st.session_state.keluhan_sidebar = ""
+
+# ==============================
 # HEADER
 # ==============================
 st.markdown("""
@@ -49,8 +59,15 @@ selected_name = st.sidebar.selectbox(
 
 selected_patient = next(p for p in patients if p["nama"]==selected_name)
 
-resep = st.sidebar.text_input("Rencana Resep")
-keluhan = st.sidebar.text_area("Keluhan Pasien")
+resep = st.sidebar.text_input(
+    "Rencana Resep",
+    key="resep_sidebar"
+)
+
+keluhan = st.sidebar.text_area(
+    "Keluhan Pasien",
+    key="keluhan_sidebar"
+)
 
 analisis_btn = st.sidebar.button("Analisis AI")
 
@@ -63,9 +80,9 @@ if "ai_result" not in st.session_state:
     <div style="background:#EAF2FF;padding:20px;border-radius:10px;margin-top:20px;">
     <b>Panduan penggunaan:</b><br>
     1. Pilih pasien dari daftar (misalnya: Budi Santoso)<br>
-    2. Isi rencana resep dokter (misalnya: Paracetamol 500 mg 3x sehari)<br>
-    3. Isi keluhan pasien (misalnya: demam sejak 2 hari, sakit kepala, lemas)<br>
-    4. Klik Analisis AI untuk mendapatkan rekomendasi terapi berbasis genomik
+    2. Isi rencana resep dokter (misalnya: Metformin 500 mg 2x sehari)<br>
+    3. Isi keluhan pasien (misalnya: poliuria, polidipsia, mudah lelah)<br>
+    4. Klik Analisis AI untuk evaluasi farmakogenomik dan rekomendasi terapi
     </div>
     """,unsafe_allow_html=True)
 
@@ -106,25 +123,27 @@ with main_col:
         if resep and keluhan:
 
             prompt = f"""
-            Anda adalah sistem clinical decision support.
+            Anda adalah sistem Clinical Decision Support berbasis farmakogenomik.
 
             Data pasien:
             Nama: {selected_patient['nama']}
-            Diagnosis: {selected_patient['kondisi']}
-            Genetik: {selected_patient['rsid']}
+            Diagnosis awal: {selected_patient['kondisi']}
+            Marker genetik: {selected_patient['rsid']}
             Keluhan: {keluhan}
-            Rencana resep: {resep}
+            Rencana terapi dokter: {resep}
 
-            Berikan analisis:
+            Berikan analisis klinis singkat untuk dokter dalam format:
 
-            1. Evaluasi farmakogenomik obat
-            2. Risiko reaksi obat
-            3. Rekomendasi terapi optimal
-            4. Dosis obat perkiraan
-            5. Analisis nutrigenomik
-            6. Probabilitas diagnosis (%)
+            1. Evaluasi farmakogenomik terapi
+            2. Potensi interaksi gene–drug
+            3. Risiko adverse drug reaction
+            4. Rekomendasi terapi alternatif (jika perlu)
+            5. Estimasi dosis berbasis profil pasien
+            6. Pertimbangan nutrigenomik relevan
+            7. Probabilitas diagnosis (%)
 
-            Gunakan bahasa medis profesional.
+            Gunakan bahasa klinis singkat dan langsung ke poin.
+            Hindari penjelasan umum untuk pasien.
             """
 
             try:
@@ -197,6 +216,9 @@ with main_col:
             if "penyakit_input" in st.session_state:
                 del st.session_state["penyakit_input"]
 
+            st.session_state.resep_sidebar = ""
+            st.session_state.keluhan_sidebar = ""
+
             st.rerun()
 
 # ==============================
@@ -211,8 +233,8 @@ with info_col:
 
         st.markdown("""
         <div style="background:#FEF3C7;padding:18px;border-radius:12px;border-left:6px solid #F59E0B;">
-        Sistem ini menggunakan AI untuk analisis farmakogenomik berbasis data genom pasien.
-        Hasil analisis bersifat simulasi untuk penelitian.
+        Sistem AI ini memberikan analisis farmakogenomik berbasis marker genetik pasien.
+        Hasil analisis digunakan sebagai pendukung keputusan klinis.
         </div>
         """,unsafe_allow_html=True)
 
