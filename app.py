@@ -70,10 +70,10 @@ if "ai_result" not in st.session_state:
     margin-top:20px;
     border:1px solid #D6E4FF;">
     <b>Panduan penggunaan:</b><br>
-    1. Pilih pasien dari daftar<br>
-    2. Isi rencana resep dokter<br>
-    3. Isi keluhan pasien<br>
-    4. Klik Analisis AI
+1. Pilih pasien dari daftar (misalnya: Budi Santoso)<br>
+2. Isi rencana resep dokter (misalnya: Paracetamol 500 mg 3x sehari)<br>
+3. Isi keluhan pasien (misalnya: demam sejak 2 hari, sakit kepala, lemas)<br>
+4. Klik Analisis AI untuk mendapatkan rekomendasi terapi berbasis genomik
     </div>
     """,unsafe_allow_html=True)
 
@@ -199,9 +199,20 @@ with main_col:
                 value=st.session_state.resep_input
             )
 
-        if st.button("Selesai"):
+       if st.button("Selesai"):
 
-            st.success("Data konsultasi berhasil disimpan.")
+    st.success("Data konsultasi berhasil disimpan.")
+
+    if "ai_result" in st.session_state:
+        del st.session_state["ai_result"]
+
+    if "resep_input" in st.session_state:
+        del st.session_state["resep_input"]
+
+    if "penyakit_input" in st.session_state:
+        del st.session_state["penyakit_input"]
+
+    st.rerun()
 
 # ==============================
 # PANEL INFO
@@ -237,3 +248,4 @@ st.markdown("""
 IndoGen-AI Precision Medicine System © 2026
 </center>
 """,unsafe_allow_html=True)
+
