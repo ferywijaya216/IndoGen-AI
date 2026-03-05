@@ -1,159 +1,198 @@
 import streamlit as st
-import google.generativeai as genai
 import json
-import time
+from groq import Groq
 
-# ===============================
-# KONFIGURASI API
-# ===============================
+# ==============================
+# PAGE CONFIG
+# ==============================
+st.set_page_config(page_title="IndoGen-AI", layout="wide")
 
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-3-flash-preview")
+# ==============================
+# LOAD DATA
+# ==============================
+try:
+    with open("data_genetik.json","r",encoding="utf-8") as f:
+        patients = json.load(f)
+except:
+    st.error("File data_genetik.json tidak ditemukan")
+    patients = []
 
-# ===============================
-# KONFIGURASI PAGE
-# ===============================
+# ==============================
+# GROQ API
+# ==============================
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("API KEY GROQ belum diatur di Streamlit Secrets")
 
-st.set_page_config(
-    page_title="Panel Klinis Presisi",
-    page_icon="🧬",
-    layout="wide"
+# ==============================
+# HEADER
+# ==============================
+st.markdown("""
+<div style="background:#F4F6FA;padding:25px;border-radius:12px;border-left:6px solid #2E6BE6;">
+<h2>IndoGen-AI Clinical Decision Support System</h2>
+Precision Medicine berbasis Genomik Nasional
+</div>
+""",unsafe_allow_html=True)
+
+# ==============================
+# SIDEBAR
+# ==============================
+st.sidebar.title("Panel Dokter")
+
+patient_labels = [p["nama"] for p in patients]
+
+selected_name = st.sidebar.selectbox(
+    "Pilih Pasien",
+    patient_labels
 )
 
-# ===============================
-# WARNING / INFORMASI PENGGUNAAN
-# ===============================
+selected_patient = next(p for p in patients if p["nama"]==selected_name)
 
-if "show_info" not in st.session_state:
-    st.session_state.show_info = True
+resep = st.sidebar.text_input("Rencana Resep")
+keluhan = st.sidebar.text_area("Keluhan Pasien")
 
-if st.session_state.show_info:
-    col1, col2 = st.columns([10,1])
+analisis_btn = st.sidebar.button("Analisis AI")
+
+# ==============================
+# PANDUAN
+# ==============================
+if "ai_result" not in st.session_state:
+
+    st.markdown("""
+    <div style="background:#EAF2FF;padding:20px;border-radius:10px;margin-top:20px;">
+    <b>Panduan penggunaan:</b><br>
+    1. Pilih pasien dari daftar<br>
+    2. Isi rencana resep dokter<br>
+    3. Isi keluhan pasien<br>
+    4. Klik Analisis AI
+    </div>
+    """,unsafe_allow_html=True)
+
+# ==============================
+# LAYOUT
+# ==============================
+main_col, info_col = st.columns([3,1])
+
+# ==============================
+# PROFIL PASIEN
+# ==============================
+with main_col:
+
+    st.subheader("Profil Pasien")
+
+    col1,col2,col3 = st.columns(3)
 
     with col1:
-        st.warning("""
-### ⚠️ Informasi Penggunaan Panel Klinis
-
-Panel ini merupakan **simulasi sistem kesehatan presisi**.
-
-Cara penggunaan:
-1. Pilih **profil pasien dummy**
-2. Masukkan **keluhan pasien**
-3. Masukkan **rencana resep dokter**
-4. Klik **Analisis AI**
-
-AI akan melakukan:
-- Analisis **farmakogenomik**
-- Analisis **nutrigenomik**
-- Evaluasi **kesesuaian obat**
-- Rekomendasi **obat alternatif**
-- Estimasi **diagnosis penyakit**
-        """)
+        st.metric("Tekanan Darah",selected_patient["ttv"]["td"])
 
     with col2:
-        if st.button("✖"):
-            st.session_state.show_info = False
+        st.metric("Berat Badan",selected_patient["ttv"]["bb"]+" kg")
 
-# ===============================
-# DATA PASIEN DUMMY
-# ===============================
+    with col3:
+        st.metric("Tinggi Badan",selected_patient["ttv"]["tb"]+" cm")
 
-data_pasien = [
-{"nama": "Budi Santoso", "nik": "3201010022330001", "ttv": {"td": "145/95", "bb": "85", "tb": "170", "n": "88"}, "kondisi": "Diabetes Melitus Tipe 2", "rsid": "rs7903146(T/T) - TCF7L2"},
-{"nama": "Siti Aminah", "nik": "3171050044550002", "ttv": {"td": "110/70", "bb": "48", "tb": "155", "n": "76"}, "kondisi": "Kanker Payudara", "rsid": "rs1065852(G/G) - CYP2D6"},
-{"nama": "Luh Putu Astuti", "nik": "5171030011220004", "ttv": {"td": "120/80", "bb": "52", "tb": "160", "n": "80"}, "kondisi": "Epilepsi", "rsid": "HLA-B*15:02 (Positif)"},
-{"nama": "Irfan Hakim", "nik": "7371020088990003", "ttv": {"td": "150/100", "bb": "92", "tb": "175", "n": "92"}, "kondisi": "Obesitas Morbid", "rsid": "rs9939609(A/A) - FTO"},
-{"nama": "Ahmad Fauzi", "nik": "1171010099880005", "ttv": {"td": "135/85", "bb": "65", "tb": "168", "n": "84"}, "kondisi": "Jantung Koroner", "rsid": "rs12248560(C/T)"},
-{"nama": "Maria Walanda", "nik": "7171040077660006", "ttv": {"td": "130/90", "bb": "70", "tb": "158", "n": "82"}, "kondisi": "Artritis Reumatoid", "rsid": "rs2476601(A/G)"},
-{"nama": "Andi Pratama", "nik": "6471020033440007", "ttv": {"td": "115/75", "bb": "78", "tb": "180", "n": "72"}, "kondisi": "Asma Bronkial", "rsid": "rs1042713(A/G)"},
-{"nama": "Samuel Tabuni", "nik": "9171010055440008", "ttv": {"td": "140/95", "bb": "82", "tb": "172", "n": "86"}, "kondisi": "Gout Akut", "rsid": "rs2231142(G/T)"},
-{"nama": "Dian Sastro", "nik": "3273010011990009", "ttv": {"td": "110/70", "bb": "55", "tb": "163", "n": "78"}, "kondisi": "Hipotiroidisme", "rsid": "rs1801133(C/T)"},
-{"nama": "Eko Prasetyo", "nik": "3578020022880010", "ttv": {"td": "125/80", "bb": "60", "tb": "167", "n": "74"}, "kondisi": "Depresi Mayor", "rsid": "rs6265(C/T)"}
-]
+    st.write("**Nadi:**",selected_patient["ttv"]["n"],"bpm")
 
-# ===============================
-# PILIH PASIEN
-# ===============================
+    st.write("**Diagnosis HIS:**",selected_patient["kondisi"])
 
-st.subheader("📋 Profil Pasien")
+    st.write("**Genetik Pasien:**",selected_patient["rsid"])
 
-nama_pasien = st.selectbox(
-    "Pilih pasien",
-    [p["nama"] for p in data_pasien]
-)
-
-pasien = next(p for p in data_pasien if p["nama"] == nama_pasien)
-
-st.json(pasien)
-
-# ===============================
-# INPUT DOKTER
-# ===============================
-
-st.subheader("🩺 Input Dokter")
-
-keluhan = st.text_area("Keluhan pasien")
-
-resep = st.text_area("Rencana resep dokter")
-
-# ===============================
+# ==============================
 # ANALISIS AI
-# ===============================
+# ==============================
+    if analisis_btn:
 
-def analisis_ai(prompt):
+        if resep and keluhan:
 
-    for i in range(3):
+            prompt = f"""
+            Anda adalah sistem clinical decision support.
 
-        try:
+            Data pasien:
+            Nama: {selected_patient['nama']}
+            Diagnosis: {selected_patient['kondisi']}
+            Genetik: {selected_patient['rsid']}
+            Keluhan: {keluhan}
+            Rencana resep: {resep}
 
-            response = model.generate_content(prompt)
+            Berikan analisis:
 
-            return response.text
+            1. Evaluasi farmakogenomik obat
+            2. Risiko reaksi obat
+            3. Rekomendasi terapi optimal
+            4. Dosis obat perkiraan
+            5. Analisis nutrigenomik
+            6. Probabilitas diagnosis (%)
 
-        except Exception:
+            Gunakan bahasa medis profesional.
+            """
 
-            time.sleep(3)
+            try:
 
-    return "Server AI sedang sibuk. Silakan coba beberapa saat lagi."
+                with st.spinner("AI sedang menganalisis data genom pasien..."):
 
-# ===============================
-# TOMBOL ANALISIS
-# ===============================
+                    response = client.chat.completions.create(
 
-if st.button("🔬 Analisis AI"):
+                        model="llama-3.3-70b-versatile",
 
-    if keluhan == "" or resep == "":
-        st.error("Keluhan dan resep harus diisi.")
+                        messages=[
+                            {"role":"user","content":prompt}
+                        ]
 
-    else:
+                    )
 
-        prompt = f"""
-Anda adalah AI klinis sistem kesehatan presisi.
+                    result = response.choices[0].message.content
 
-Data pasien:
-{json.dumps(pasien)}
+                    st.session_state.ai_result = result
 
-Keluhan pasien:
-{keluhan}
+            except Exception as e:
 
-Rencana resep dokter:
-{resep}
+                st.error("Server AI sedang sibuk. Coba lagi beberapa saat.")
 
-Lakukan analisis:
+        else:
 
-1. Analisis farmakogenomik
-2. Analisis nutrigenomik
-3. Evaluasi kesesuaian obat
-4. Rekomendasi obat yang lebih sesuai jika ada
-5. Estimasi diagnosis penyakit dalam persen
+            st.warning("Isi resep dan keluhan terlebih dahulu")
 
-Buat hasil dalam format laporan klinis ringkas.
-"""
+# ==============================
+# HASIL ANALISIS
+# ==============================
+    if "ai_result" in st.session_state:
 
-        with st.spinner("AI sedang menganalisis genom pasien..."):
+        st.subheader("Hasil Analisis AI")
 
-            hasil = analisis_ai(prompt)
+        st.markdown(f"""
+        <div style="background:white;padding:20px;border-radius:12px;border:1px solid #E2E8F0;">
+        {st.session_state.ai_result}
+        </div>
+        """,unsafe_allow_html=True)
 
-        st.subheader("🧬 Hasil Analisis AI")
+# ==============================
+# PANEL INFO
+# ==============================
+with info_col:
 
-        st.write(hasil)
+    if "hide_warning" not in st.session_state:
+        st.session_state.hide_warning=False
+
+    if not st.session_state.hide_warning:
+
+        st.markdown("""
+        <div style="background:#FEF3C7;padding:18px;border-radius:12px;border-left:6px solid #F59E0B;">
+        Sistem ini menggunakan AI untuk analisis farmakogenomik berbasis data genom pasien.
+        Hasil analisis bersifat simulasi untuk penelitian.
+        </div>
+        """,unsafe_allow_html=True)
+
+        if st.button("Tutup Informasi"):
+            st.session_state.hide_warning=True
+            st.rerun()
+
+# ==============================
+# FOOTER
+# ==============================
+st.markdown("""
+<hr>
+<center>
+IndoGen-AI Precision Medicine System © 2026
+</center>
+""",unsafe_allow_html=True)
