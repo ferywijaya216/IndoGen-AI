@@ -1,6 +1,6 @@
 import streamlit as st
-from groq import Groq
 import json
+from groq import Groq
 
 # ==============================
 # PAGE CONFIG
@@ -11,71 +11,71 @@ st.set_page_config(page_title="IndoGen-AI", layout="wide")
 # LOAD DATA
 # ==============================
 try:
-    with open("data_genetik.json", "r", encoding="utf-8") as f:
+    with open("data_genetik.json","r",encoding="utf-8") as f:
         patients = json.load(f)
-except FileNotFoundError:
-    st.error("File data_genetik.json tidak ditemukan.")
+except:
+    st.error("File data_genetik.json tidak ditemukan")
     patients = []
 
 # ==============================
 # GROQ API
 # ==============================
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-
-# ==============================
-# SIDEBAR
-# ==============================
-st.sidebar.title("IndoGen-AI")
-
-patient_labels = [f"{p['nama']} - {p['nik']}" for p in patients]
-
-selected_label = st.sidebar.selectbox(
-    "Antrean Pasien (HIS)",
-    patient_labels
-)
-
-selected_index = patient_labels.index(selected_label)
-selected_patient = patients[selected_index]
-
-resep = st.sidebar.text_input("Rencana Resep")
-keluhan = st.sidebar.text_area("Keluhan Utama")
-
-analisis_btn = st.sidebar.button("Analisis")
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("API KEY GROQ belum diatur di Streamlit Secrets")
 
 # ==============================
 # HEADER
 # ==============================
 st.markdown("""
-<div style="
-background-color:#F4F6FA;
-padding:30px;
-border-radius:15px;
-border-left:6px solid #2E6BE6;">
-<h2>Clinical Decision Support System</h2>
-Integrasi Nasional Data Genomik BGSi
+<div style="background:linear-gradient(90deg,#eef2ff,#f8fafc);
+padding:28px;
+border-radius:14px;
+border-left:8px solid #2E6BE6;
+box-shadow:0 4px 12px rgba(0,0,0,0.05)">
+<h2 style="margin-bottom:5px;">IndoGen-AI Clinical Decision Support System</h2>
+Precision Medicine berbasis Genomik Nasional
 </div>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
 
 # ==============================
-# PANDUAN PENGGUNAAN
+# SIDEBAR
 # ==============================
-if 'ai_result' not in st.session_state:
+st.sidebar.title("Panel Dokter")
+
+patient_labels = [p["nama"] for p in patients]
+
+selected_name = st.sidebar.selectbox(
+    "Pilih Pasien",
+    patient_labels
+)
+
+selected_patient = next(p for p in patients if p["nama"]==selected_name)
+
+resep = st.sidebar.text_input("Rencana Resep")
+keluhan = st.sidebar.text_area("Keluhan Pasien")
+
+analisis_btn = st.sidebar.button("Analisis AI")
+
+# ==============================
+# PANDUAN
+# ==============================
+if "ai_result" not in st.session_state:
+
     st.markdown("""
-<div style="
-background-color:#EAF2FF;
-padding:20px;
-border-radius:10px;
-margin-top:20px;">
-
-<b>Panduan Penggunaan Sistem</b><br><br>
-
-1. Pilih pasien pada panel Antrean Pasien.<br>
-2. Masukkan rencana obat pada kolom Resep.<br>
-3. Masukkan keluhan pasien.<br>
-4. Klik Analisis untuk mendapatkan evaluasi farmakogenomik.
-
-</div>
-""", unsafe_allow_html=True)
+    <div style="background:#EAF2FF;
+    padding:20px;
+    border-radius:12px;
+    margin-top:20px;
+    border:1px solid #D6E4FF;">
+    <b>Panduan penggunaan:</b><br>
+    1. Pilih pasien dari daftar<br>
+    2. Isi rencana resep dokter<br>
+    3. Isi keluhan pasien<br>
+    4. Klik Analisis AI
+    </div>
+    """,unsafe_allow_html=True)
 
 # ==============================
 # LAYOUT
@@ -83,137 +83,125 @@ margin-top:20px;">
 main_col, info_col = st.columns([3,1])
 
 # ==============================
-# DASHBOARD UTAMA
+# PROFIL PASIEN
 # ==============================
 with main_col:
 
-    st.markdown(f"""
-<div style="
-background:white;
-padding:20px;
-border-radius:15px;
-margin-top:20px;">
+    st.subheader("Profil Pasien")
 
-<b>Nama:</b> {selected_patient['nama']}<br>
-<b>Diagnosis HIS:</b> {selected_patient['kondisi']}<br>
+    col1,col2,col3 = st.columns(3)
 
-<b>TTV:</b>
-{selected_patient['ttv']['td']} mmHg |
-{selected_patient['ttv']['bb']} kg |
-{selected_patient['ttv']['tb']} cm |
-Nadi {selected_patient['ttv']['n']} bpm
+    with col1:
+        st.metric("Tekanan Darah",selected_patient["ttv"]["td"])
 
-<br><br>
+    with col2:
+        st.metric("Berat Badan",selected_patient["ttv"]["bb"]+" kg")
 
-<b>Data Genetik:</b> {selected_patient['rsid']}
+    with col3:
+        st.metric("Tinggi Badan",selected_patient["ttv"]["tb"]+" cm")
 
-</div>
-""", unsafe_allow_html=True)
+    st.write("**Nadi:**",selected_patient["ttv"]["n"],"bpm")
 
-    # ==============================
-    # ANALISIS AI
-    # ==============================
+    st.write("**Diagnosis HIS:**",selected_patient["kondisi"])
 
+    st.write("**Genetik Pasien:**",selected_patient["rsid"])
+
+# ==============================
+# ANALISIS AI
+# ==============================
     if analisis_btn:
 
         if resep and keluhan:
 
             prompt = f"""
-Pasien: {selected_patient['nama']}
-Diagnosis: {selected_patient['kondisi']}
-Genetik: {selected_patient['rsid']}
+            Anda adalah sistem clinical decision support.
 
-Keluhan: {keluhan}
+            Data pasien:
+            Nama: {selected_patient['nama']}
+            Diagnosis: {selected_patient['kondisi']}
+            Genetik: {selected_patient['rsid']}
+            Keluhan: {keluhan}
+            Rencana resep: {resep}
 
-Rencana resep dokter: {resep}
+            Berikan analisis:
 
-Tugas Anda:
+            1. Evaluasi farmakogenomik obat
+            2. Risiko reaksi obat
+            3. Rekomendasi terapi optimal
+            4. Dosis obat perkiraan
+            5. Analisis nutrigenomik
+            6. Probabilitas diagnosis (%)
 
-1. Analisis farmakogenomik berdasarkan gen pasien
-2. Evaluasi kesesuaian obat
-3. Berikan alternatif obat jika diperlukan
-4. Sertakan estimasi dosis
-5. Berikan analisis nutrigenomik
-6. Berikan kemungkinan diagnosis (%)
-
-Tuliskan sebagai laporan klinis singkat.
-"""
+            Gunakan bahasa medis profesional.
+            """
 
             try:
 
-                with st.spinner("AI sedang menganalisis genom pasien..."):
+                with st.spinner("AI sedang menganalisis data genom pasien..."):
 
-                    chat = client.chat.completions.create(
+                    response = client.chat.completions.create(
+
                         model="llama-3.3-70b-versatile",
+
                         messages=[
-                            {"role": "user", "content": prompt}
+                            {"role":"user","content":prompt}
                         ]
+
                     )
 
-                    st.session_state.ai_result = chat.choices[0].message.content
+                    result = response.choices[0].message.content
 
-            except:
-                st.error("Server AI sedang sibuk. Silakan coba beberapa saat lagi.")
+                    st.session_state.ai_result = result
+
+                    st.session_state.resep_input = resep
+                    st.session_state.penyakit_input = selected_patient["kondisi"]
+
+            except Exception as e:
+
+                st.error("Server AI sedang sibuk. Coba lagi beberapa saat.")
 
         else:
-            st.warning("Isi Resep dan Keluhan terlebih dahulu.")
 
-    # ==============================
-    # TAMPILKAN HASIL AI
-    # ==============================
+            st.warning("Isi resep dan keluhan terlebih dahulu")
 
-    if 'ai_result' in st.session_state:
+# ==============================
+# HASIL ANALISIS
+# ==============================
+    if "ai_result" in st.session_state:
 
-        st.write("### Hasil Analisis AI")
+        st.subheader("Hasil Analisis AI")
 
         st.markdown(f"""
-<div style="
-background-color:white;
-padding:20px;
-border-radius:15px;
-border:1px solid #E2E8F0;">
-{st.session_state.ai_result}
-</div>
-""", unsafe_allow_html=True)
+        <div style="
+        background:white;
+        padding:22px;
+        border-radius:14px;
+        border:1px solid #E2E8F0;
+        box-shadow:0 3px 10px rgba(0,0,0,0.05);
+        margin-bottom:25px;">
+        {st.session_state.ai_result}
+        </div>
+        """,unsafe_allow_html=True)
 
-        # ==============================
-        # FINALISASI DOKTER
-        # ==============================
+        st.markdown("### Ringkasan Dokter")
 
-        st.write("### Finalisasi Dokter")
+        col_a, col_b = st.columns(2)
 
-        with st.form("final_form"):
+        with col_a:
+            penyakit_final = st.text_input(
+                "Diagnosis / Penyakit",
+                value=st.session_state.penyakit_input
+            )
 
+        with col_b:
             resep_final = st.text_input(
-                "Resep Final",
-                value=resep
+                "Resep Obat",
+                value=st.session_state.resep_input
             )
 
-            diagnosis_final = st.text_input(
-                "Diagnosis Final",
-                value=selected_patient['kondisi']
-            )
+        if st.button("Selesai"):
 
-            selesai_btn = st.form_submit_button("Selesai")
-
-            if selesai_btn:
-
-                st.success("Keputusan klinis berhasil disimpan.")
-
-                st.markdown(f"""
-<div style="
-background:#F0F9FF;
-padding:15px;
-border-radius:10px;
-border-left:5px solid #0284C7;">
-
-<b>Ringkasan Keputusan Klinis</b><br><br>
-
-Resep Final: {resep_final}<br>
-Diagnosis Final: {diagnosis_final}
-
-</div>
-""", unsafe_allow_html=True)
+            st.success("Data konsultasi berhasil disimpan.")
 
 # ==============================
 # PANEL INFO
@@ -221,35 +209,24 @@ Diagnosis Final: {diagnosis_final}
 with info_col:
 
     if "hide_warning" not in st.session_state:
-        st.session_state.hide_warning = False
+        st.session_state.hide_warning=False
 
     if not st.session_state.hide_warning:
 
         st.markdown("""
-<div style="
-background-color:#FEF3C7;
-padding:18px;
-border-radius:12px;
-border-left:6px solid #F59E0B;">
-""", unsafe_allow_html=True)
+        <div style="
+        background:#FEF3C7;
+        padding:18px;
+        border-radius:12px;
+        border-left:6px solid #F59E0B;">
+        Sistem ini menggunakan AI untuk analisis farmakogenomik berbasis data genom pasien.
+        Hasil analisis bersifat simulasi untuk penelitian.
+        </div>
+        """,unsafe_allow_html=True)
 
-        col_title, col_x = st.columns([5,1])
-
-        with col_title:
-            st.markdown("**Informasi Sistem**")
-
-        with col_x:
-            if st.button("✕"):
-                st.session_state.hide_warning = True
-                st.rerun()
-
-        st.markdown("""
-Sistem ini menggunakan layanan AI berbasis Large Language Model.
-
-Analisis bersifat sebagai Clinical Decision Support
-dan tidak menggantikan keputusan klinis dokter.
-</div>
-""", unsafe_allow_html=True)
+        if st.button("Tutup Informasi"):
+            st.session_state.hide_warning=True
+            st.rerun()
 
 # ==============================
 # FOOTER
@@ -257,6 +234,6 @@ dan tidak menggantikan keputusan klinis dokter.
 st.markdown("""
 <hr>
 <center>
-IndoGen-AI Precision System © 2026
+IndoGen-AI Precision Medicine System © 2026
 </center>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
