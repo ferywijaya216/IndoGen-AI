@@ -29,12 +29,8 @@ except:
 # HEADER
 # ==============================
 st.markdown("""
-<div style="background:linear-gradient(90deg,#eef2ff,#f8fafc);
-padding:28px;
-border-radius:14px;
-border-left:8px solid #2E6BE6;
-box-shadow:0 4px 12px rgba(0,0,0,0.05)">
-<h2 style="margin-bottom:5px;">IndoGen-AI Clinical Decision Support System</h2>
+<div style="background:#F4F6FA;padding:25px;border-radius:12px;border-left:6px solid #2E6BE6;">
+<h2>IndoGen-AI Clinical Decision Support System</h2>
 Precision Medicine berbasis Genomik Nasional
 </div>
 """,unsafe_allow_html=True)
@@ -64,16 +60,12 @@ analisis_btn = st.sidebar.button("Analisis AI")
 if "ai_result" not in st.session_state:
 
     st.markdown("""
-    <div style="background:#EAF2FF;
-    padding:20px;
-    border-radius:12px;
-    margin-top:20px;
-    border:1px solid #D6E4FF;">
+    <div style="background:#EAF2FF;padding:20px;border-radius:10px;margin-top:20px;">
     <b>Panduan penggunaan:</b><br>
-1. Pilih pasien dari daftar (misalnya: Budi Santoso)<br>
-2. Isi rencana resep dokter (misalnya: Paracetamol 500 mg 3x sehari)<br>
-3. Isi keluhan pasien (misalnya: demam sejak 2 hari, sakit kepala, lemas)<br>
-4. Klik Analisis AI untuk mendapatkan rekomendasi terapi berbasis genomik
+    1. Pilih pasien dari daftar (misalnya: Budi Santoso)<br>
+    2. Isi rencana resep dokter (misalnya: Paracetamol 500 mg 3x sehari)<br>
+    3. Isi keluhan pasien (misalnya: demam sejak 2 hari, sakit kepala, lemas)<br>
+    4. Klik Analisis AI untuk mendapatkan rekomendasi terapi berbasis genomik
     </div>
     """,unsafe_allow_html=True)
 
@@ -152,7 +144,6 @@ with main_col:
                     result = response.choices[0].message.content
 
                     st.session_state.ai_result = result
-
                     st.session_state.resep_input = resep
                     st.session_state.penyakit_input = selected_patient["kondisi"]
 
@@ -172,47 +163,41 @@ with main_col:
         st.subheader("Hasil Analisis AI")
 
         st.markdown(f"""
-        <div style="
-        background:white;
-        padding:22px;
-        border-radius:14px;
-        border:1px solid #E2E8F0;
-        box-shadow:0 3px 10px rgba(0,0,0,0.05);
-        margin-bottom:25px;">
+        <div style="background:white;padding:20px;border-radius:12px;border:1px solid #E2E8F0;">
         {st.session_state.ai_result}
         </div>
         """,unsafe_allow_html=True)
 
-        st.markdown("### Ringkasan Dokter")
+        st.markdown("---")
 
-        col_a, col_b = st.columns(2)
+        st.subheader("Rekomendasi Akhir Dokter")
 
-        with col_a:
-            penyakit_final = st.text_input(
-                "Diagnosis / Penyakit",
-                value=st.session_state.penyakit_input
-            )
+        resep_final = st.text_input(
+            "Resep Final",
+            value=st.session_state.resep_input,
+            key="resep_edit"
+        )
 
-        with col_b:
-            resep_final = st.text_input(
-                "Resep Obat",
-                value=st.session_state.resep_input
-            )
+        penyakit_final = st.text_input(
+            "Diagnosis Final",
+            value=st.session_state.penyakit_input,
+            key="penyakit_edit"
+        )
 
-       if st.button("Selesai"):
+        if st.button("Selesai"):
 
-    st.success("Data konsultasi berhasil disimpan.")
+            st.success("Data konsultasi berhasil disimpan.")
 
-    if "ai_result" in st.session_state:
-        del st.session_state["ai_result"]
+            if "ai_result" in st.session_state:
+                del st.session_state["ai_result"]
 
-    if "resep_input" in st.session_state:
-        del st.session_state["resep_input"]
+            if "resep_input" in st.session_state:
+                del st.session_state["resep_input"]
 
-    if "penyakit_input" in st.session_state:
-        del st.session_state["penyakit_input"]
+            if "penyakit_input" in st.session_state:
+                del st.session_state["penyakit_input"]
 
-    st.rerun()
+            st.rerun()
 
 # ==============================
 # PANEL INFO
@@ -225,11 +210,7 @@ with info_col:
     if not st.session_state.hide_warning:
 
         st.markdown("""
-        <div style="
-        background:#FEF3C7;
-        padding:18px;
-        border-radius:12px;
-        border-left:6px solid #F59E0B;">
+        <div style="background:#FEF3C7;padding:18px;border-radius:12px;border-left:6px solid #F59E0B;">
         Sistem ini menggunakan AI untuk analisis farmakogenomik berbasis data genom pasien.
         Hasil analisis bersifat simulasi untuk penelitian.
         </div>
@@ -248,4 +229,3 @@ st.markdown("""
 IndoGen-AI Precision Medicine System © 2026
 </center>
 """,unsafe_allow_html=True)
-
