@@ -3,6 +3,22 @@ import json
 from groq import Groq
 
 # ==============================
+# FORCE LIGHT MODE
+# ==============================
+st.set_page_config(page_title="IndoGen-AI", layout="wide")
+
+# CSS untuk paksa light mode
+st.markdown("""
+<style>
+    :root {
+        color-scheme: light !important;
+    }
+    [data-testid="stApp"] {
+        background-color: #FFFFFF !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+# ==============================
 # PAGE CONFIG
 # ==============================
 st.set_page_config(page_title="IndoGen-AI", layout="wide")
